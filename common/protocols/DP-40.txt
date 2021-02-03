@@ -1,0 +1,84 @@
+Drone Protocol 40-bit
+rev. 0001
+
+Edited by toqsycc
+
+Overview:
+	Input data (HEX): XX-XX-XX-XX-XX
+	Auth keys         -            -
+	1st cmd addr	   - -
+	1st cmd arg           - -
+	2nd cmd addr             - -
+	2nd cmd arg                 - -
+
+	Output data(HEX): XX-XX-XX-XX-XX
+	Auth keys         -            -	INVERTED!
+	1st cmd addr	   - -
+	1st cmd status        - -
+	2nd cmd addr             - -
+	2nd cmd status              - -
+
+Example:
+	For input data (HEX): { EF, F3, 2F, D3, 22 }
+	Auth keys is:			E2
+	1st cmd addr is:		FF
+	2nd cmd addr is:		FD
+	1st cmd arg is:			32
+	2nd cmd arg is:			32
+
+	For output data (HEX): { 2F, F3, 2F, D3, 2E }
+	Auth keys is:			E2
+	1st cmd addr is:		FF
+	2nd cmd addr is:		FD
+	1st cmd status is:		32
+	2nd cmd status is:		32
+
+Command address table:
+	\\ Special \\
+	00..0F					Reserved
+	20..2F					Reserved
+	35..DF					Reserved
+	E7..FF					Reserved
+	\\ With inversion support \\
+	10						Left engines row
+	11						Right engines row
+	12						Servo A / Clearance angle
+	13						Servo B / Center of mass
+	14						Servo C / Manipulator base
+	15						Servo D / Manipulator bend
+	16						Servo E / Manipulator X axis
+	17						Servo F / Manipulator Z axis
+	18						Inverted 10
+	19						Inverted 11
+	1A						Inverted 12
+	1B						Inverted 13
+	1C						Inverted 14
+	1D						Inverted 15
+	1E						Inverted 16
+	1F						Inverted 17
+	\\ Logic \\
+	30						Laser power
+	31						Transmitter power
+	32						Lights power
+	33						Camera channel selector A
+	34						Camera channel selector B
+	\\ Output only \\
+	E0						Accelerometer X angle
+	E1						Accelerometer Y angle
+	E2						Accelerometer Z angle
+	E3						Accelerometer X acceleration
+	E4						Accelerometer Y acceleration
+	E5						Accelerometer Z acceleration
+	E6						Drone state
+
+Status table:
+	\\ Special \\
+	00..EF					Reserved
+	\\ Others \\
+	F0						Failed
+	FA						Succeeded
+	FB						Idle
+	FC						Online
+	FD						Not respond
+	FE						Damaged or destroyed
+	FF						Battery low
