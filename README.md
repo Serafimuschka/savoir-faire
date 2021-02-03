@@ -1,5 +1,5 @@
-# KopatelOffline
-Базовый репозиторий разработки дрона Kopatel Offline
+# Savoir-Faire
+Базовый репозиторий разработки дрона Savoir-Faire
 ***
 ## Компонентная база
 * Arduino
