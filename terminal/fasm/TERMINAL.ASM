@@ -1,3 +1,11 @@
+;-------------------------------;
+;   Drone terminal application  ;
+;         Revision 0001         ;
+;-------------------------------;
+;Developed and edited by toqsycc;
+;-------------------------------;
+;Dec 2020 - Feb 2021 (c) toqsycc;
+;-------------------------------;
 include "macros.inc"            ;
                                 ;
 MEOS_APP_START                  ; PROGRAM BEGIN MACROS
@@ -86,131 +94,82 @@ draw_window:                    ; Drawing a window
 ;  mcall                        ; /
                                 ;
    ;----------------------------;
-   ;       Frame drawings       ;
+   ;      Antenna drawings      ;
    ;----------------------------;
                                 ;
-   mov eax, 1                   ; \ Calling SysFn01: Draw a pixel
-   mov ebx, 1017                ; | Move to EBX register a X-position
-   mov ecx, 5                   ; | Move to ECX register a Y-position
-   mov edx, 0x00323232          ; / Move to EDX register a color, 0x00RRGGBB
-fra:                            ; Frame-A fragment
-   mcall                        ; Call SysFn01
-   dec ebx                      ; Decrement EBX register value
-   cmp ebx, ecx                 ; Compare EBX register value with ECX register value
-   jne fra                      ; If EBX != ECX then repeat
+   mov eax, 38                  ;
+   mov ebx, 810 * 65536 + 810   ;
+   mov ecx, 10 * 65536 + 26     ;
+   mov edx, connect_good        ;
+   mcall                        ;
                                 ;
-frb:                            ; Frame-B fragment
-   mcall                        ; Call SysFn01
-   inc ecx                      ; Increment ECX register value
-   cmp ecx, 45                  ; Compare ECX register value with 45
-   jne frb                      ; If ECX != 45 then repeat
+   mov ebx, 804 * 65536 + 816   ;
+   mov ecx, 10 * 65536 + 10     ;
+   mcall                        ;
                                 ;
-frc:                            ; Frame-C fragment
-   mcall                        ; Call SysFn01
-   inc ebx                      ; Increment EBX register value
-   cmp ebx, 1017                ; Compare EBX register value with 1017
-   jne frc                      ; If EBX != 1017 then repeat
+   mov ebx, 804 * 65536 + 810   ;
+   mov ecx, 10 * 65536 + 16     ;
+   mcall                        ;
                                 ;
-frd:                            ; Frame-D fragment
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 5                   ; Compare ECX register value with 5
-   jne frd                      ; If ECX != 5 then repeat
+   mov ebx, 816 * 65536 + 810   ;
+   mcall                        ;
+                                ;
+   ;----------------------------;
+   ;       Frame drawings       ;
+   ;----------------------------;
+                                ; Updated and optimized frame drawer
+   mov ebx, 5 * 65536 + 1017    ; See the syntax on line 90
+   mov ecx, 5 * 65536 + 5       ;
+   mov edx, 0x00323232          ;
+   mcall                        ;
+
+   mov ecx, 45 * 65536 + 45     ;
+   mcall
+                                ;
+   mov ebx, 1017 * 65536 + 1017 ;
+   mov ecx, 5 * 65536 + 763     ;
+   mcall                        ;
+                                ;
+   mov ebx, 5 * 65536 + 5       ;
+   mcall                        ;
+                                ;
+   mov ebx, 5 * 65536 + 1017    ;
+   mov ecx, 763 * 65536 + 763   ;
+   mcall                        ;
                                 ;
    ;----------------------------;
    ;   Camera pic placeholder   ; Drawing a placeholder with size 644x480
    ;----------------------------;
                                 ;
-   mov ebx, picWidth            ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x000000FF          ; Move to EDX register a color of Segment-A
-a:                              ; Segment-A
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne a                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 1   ; Compare EBX register value with width of segment (92)
-   jne a                        ; If EBX != picWidth - 92 * 1 then repeat
+   mov eax, 13                  ; Updated and optimized placeholder drawer
+   mov ebx, 692 * 65536 + 92    ; See the syntax on line 84
+   mov ecx, 50 * 65536 + 480    ;
+   mov edx, 0x000000FF          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 1   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x00FF0000          ; Move to EDX register a color of Segment-B
-b:                              ; Segment-B
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne b                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 2   ; Compare EBX register value with width of segment (92)
-   jne b                        ; If EBX != picWidth - 92 * 2 then repeat
+   mov ebx, 600 * 65536 + 92    ;
+   mov edx, 0x00FF0000          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 2   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x00FF00FF          ; Move to EDX register a color of Segment-C
-c:                              ; Segment-C
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne c                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 3   ; If EBX != picWidth - 92 * 3 then repeat
-   jne c                        ;
+   mov ebx, 508 * 65536 + 92    ;
+   mov edx, 0x00FF00FF          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 3   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x0000FF00          ; Move to EDX register a color of Segment-D
-d:                              ; Segment-D
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne d                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 4   ; Compare EBX register value with width of segment (92)
-   jne d                        ; If EBX != picWidth - 92 * 4 then repeat
+   mov ebx, 416 * 65536 + 92    ;
+   mov edx, 0x0000FF00          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 4   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x0000FFFF          ; Move to EDX register a color of Segment-E
-e:                              ; Segment-E
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne e                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 5   ; Compare EBX register value with width of segment (92)
-   jne e                        ; If EBX != picWidth - 92 * 5 then repeat
+   mov ebx, 324 * 65536 + 92    ;
+   mov edx, 0x0000FFFF          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 5   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x00FFFF00          ; Move to EDX register a color of Segment-F
-f:                              ; Segment-F
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne f                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 6   ; Compare EBX register value with width of segment (92)
-   jne f                        ; If EBX != picWidth - 92 * 6 then repeat
+   mov ebx, 232 * 65536 + 92    ;
+   mov edx, 0x00FFFF00          ;
+   mcall                        ;
                                 ;
-   mov ebx, picWidth - 92 * 6   ; Move to EBX register a X-position
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   mov edx, 0x00FFFFFF          ; Move to EDX register a color of Segment-G
-g:                              ; Segment-G
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne g                        ; If ECX != 50 then repeat, else
-   dec ebx                      ; Decrement EBX register value
-   mov ecx, picHeight           ; Move to ECX register a Y-position
-   cmp ebx, picWidth - 92 * 7   ; Compare EBX register value with width of segment (92)
-   jne g                        ; If EBX != picWidth - 92 * 7 then repeat
+   mov ebx, 140 * 65536 + 92    ;
+   mov edx, 0x00FFFFFF          ;
+   mcall                        ;
                                 ;
    ;----------------------------;
    ;        Other frames        ;
@@ -223,33 +182,21 @@ g:                              ; Segment-G
    mov edi, 0x00000000          ; | Font background color, 0x00RRGGBB
    mcall                        ; /
                                 ;
-   mov eax, 1                   ; \ Calling SysFn01: Draw a pixel
-   mov ebx, 121                 ; | Move to EBX register a X-position
-   mov ecx, 50                  ; | Move to ECX register a Y-position
-   mov edx, 0x00FFFF00          ; / Move to EDX register a color, 0x00RRGGBB
-frva:                           ; FrameV-A
-   mcall                        ; Call SysFn01
-   inc ebx                      ; Increment EBX register value
-   cmp ebx, 784                 ; Compare EBX register value with 784
-   jne frva                     ; If EBX != 784 then repeat
+   mov eax, 38                  ; Updated and optimized frame drawing
+   mov ebx, 140 * 65536 + 784   ;
+   mov ecx, 50 * 65536 + 50     ;
+   mov edx, 0x00FFFF00          ;
+   mcall                        ;
                                 ;
-frvb:                           ; FrameV-B
-   mcall                        ; Call SysFn01
-   inc ecx                      ; Increment ECX register value
-   cmp ecx, 530                 ; Compare ECX register value with 530
-   jne frvb                     ; If ECX != 530 then repeat
+   mov ecx, 530 * 65536 + 530   ;
+   mcall                        ;
                                 ;
-frvc:                           ; FrameV-C
-   mcall                        ; Call SysFn01
-   dec ebx                      ; Decrement EBX register value
-   cmp ebx, 120                 ; Compare EBX register value with 120
-   jne frvc                     ; If EBX != 120 then repeat
+   mov ebx, 140 * 65536 + 140   ;
+   mov ecx, 50 * 65536 + 530    ;
+   mcall                        ;
                                 ;
-frvd:                           ; FrameV-D
-   mcall                        ; Call SysFn01
-   dec ecx                      ; Decrement ECX register value
-   cmp ecx, 50                  ; Compare ECX register value with 50
-   jne frvd                     ; If ECX != 50 then repeat
+   mov ebx, 784 * 65536 + 784   ;
+   mcall                        ;
                                 ;
    ;----------------------------;
    ;        Text drawing        ;
@@ -431,7 +378,7 @@ DATA                            ; PROGRAM DATA BLOCK
    currStatus        db   'Terminal initialised successfully.', 0
    prevStatus1       db   'COM port not found. Task ignored.', 0
    prevStatus2       db   'Receiver not found. Task ignored.', 0
-   terminalIn        db   '#toqsycc > ', 0
+   terminalIn        db   '#terminal > ', 0
                                 ;
    droneStatus       db   'Online', 0
    droneLaser        db   'Laser', 0
@@ -446,7 +393,19 @@ DATA                            ; PROGRAM DATA BLOCK
    droneManipulator  db   'Manipulator', 0
    droneWarning      db   'Warning', 0
    droneDamaged      db   'Damaged', 0
-   droneDigger       db    'Digger Offline', 0
+   droneSF           db   'Savoir-Faire'
+                                ;
+   measure           db   'm/s^2', 0
+   accelX            db   'X ACCELERATION: ', 0
+   accelY            db   'Y ACCELERATION: ', 0
+   accelZ            db   'Z ACCELERATION: ', 0
+   transmission      db   'TRANSMISSION TYPE: ', 0
+   trans_slow        db   'Slow', 0
+   trans_normal      db   'Normal', 0
+   trans_fast        db   'Fast', 0
+   ping              db   'CONNECTION PING: ', 0
+   ping_meas         db   'ms', 0
+
                                 ;
    ;----------------------------;
    ;  ADDITIVE CONSTANTS BLOCK  ;
@@ -462,6 +421,20 @@ DATA                            ; PROGRAM DATA BLOCK
    ts_error          =     0x80FF0000
    ts_danger         =     0x80FF9600
    ts_category       =     0x80FFFFFF
+                                ;
+   mvmt_idle         =     0x00646464
+   mvmt_active       =     0x00FF6464
+   accel_xaxis       =     0x00FF0000
+   accel_yaxis       =     0x00FFFF00
+   accel_zaxis       =     0x0000FF00
+                                ;
+   console_idle      =     0x00A0A0A0
+   console_type      =     0x00D0D0D0
+                                ;
+   connect_bad       =     0x00FF0000
+   connect_mid       =     0x00FFFF00
+   connect_good      =     0x0000FF00
+   connect_na        =     0x00A0A0A0
                                 ;
    ;----------------------------;
    ;       DATA BLOCK END       ;
