@@ -5,10 +5,10 @@
 */
 #include "Names.h"
 #include "IOpins.h"
-byte bufferInc[MSG_BYTES];      // РІС…РѕРґСЏС‰РёР№ Р±СѓС„РµСЂ
-byte bufferFbk[CMD_BYTES];      // Р±СѓС„РµСЂ РѕС‚РєР»РёРєР°
-byte bufTranslated[CMD_BYTES];    // Р±СѓС„РµСЂ РєРѕРјР°РЅРґ
-byte thumperMsg[3];               // С‚СЂР°РЅСЃР»СЏС†РёСЏ РЅР° С‚Р°РјРїРµСЂР°
+byte bufferInc[MSG_BYTES];      // входящий буфер
+byte bufferFbk[CMD_BYTES];      // буфер отклика
+byte bufTranslated[CMD_BYTES];    // буфер команд
+int thumperMsg = 0;
 bool automoveFlag = false;
 
 void setup() {
@@ -27,16 +27,16 @@ void loop() {
 void msgRead() {
   if (Serial.available()) {
     for (int i = 0; i < MSG_BYTES; i++) { 
-      bufferInc[i] = Serial.read(); // Р·Р°РїРёСЃС‹РІР°РµРј РІС…РѕРґСЏС‰РёР№ Р±СѓС„РµСЂ
+      bufferInc[i] = Serial.read(); // записываем входящий буфер
     }
   }
-  if ((bufferInc[0] & 0xF0) == (BYTE_KEY & 0xF0) && (bufferInc[MSG_BYTES - 1] & 0x0F) == (BYTE_KEY & 0x0F)) { // СЃСЂР°РІРЅРёРІР°РµРј РїРµСЂРІС‹Рµ Рё РїРѕСЃР»РµРґРЅРёРµ 4 Р±РёС‚Р° СЃ РєР»СЋС‡РѕРј
+  if ((bufferInc[0] & 0xF0) == (BYTE_KEY & 0xF0) && (bufferInc[MSG_BYTES - 1] & 0x0F) == (BYTE_KEY & 0x0F)) { // сравниваем первые и последние 4 бита с ключом
     for (int i = 0; i < (CMD_BYTES); i++) {
-      bufTranslated[i] = ((0x0F & bufferInc[i]) << 4) | ((0xF0 & bufferInc[i+1]) >> 4); // Р·Р°РїРёСЃС‹РІР°РµРј РѕСЃС‚Р°РІС€РёРµСЃСЏ 32 Р±РёС‚Р° РІ Р±СѓС„РµСЂ РґР»СЏ РєРѕРјРјР°РЅРґ                               
+      bufTranslated[i] = ((0x0F & bufferInc[i]) << 4) | ((0xF0 & bufferInc[i+1]) >> 4); // записываем оставшиеся 32 бита в буфер для комманд                               
     }
   }
   for (int i = 0; i < MSG_BYTES; i++) {
-    bufferInc[i] = 0; // РѕС‡РёС‰Р°РµРј РІС…РѕРґРЅРѕР№ Р±СѓС„РµСЂ
+    bufferInc[i] = 0; // очищаем входной буфер
   }
 }
 
@@ -45,13 +45,13 @@ void droneTask(const byte cmd, const byte value) {
     {
     case AUTOMOVE:
         if (value) {
-            if (!automoveFlag) {  // РµСЃР»Рё РґСЂРѕРЅ РЅРµ Р·Р°РЅСЏС‚
-                automoveFlag = true; // С‚Рѕ РѕРЅ Р±СѓРґРµС‚ Р·Р°РЅСЏС‚
-                automove();         // Р°РІС‚РѕРµР·РґРѕР№
+            if (!automoveFlag) {  // если дрон не занят
+                automoveFlag = true; // то он будет занят
+                automove();         // автоездой
                 Serial.print(CMD_SUCCESS);
             }
             else {
-                automoveFlag = false; // РµСЃР»Рё Р·Р°РЅСЏС‚ С‚Рѕ РѕСЃРІРѕР±РѕР¶РґР°РµРј РµРіРѕ
+                automoveFlag = false; // если занят то освобождаем его
             }
         }
         else {
@@ -82,34 +82,7 @@ void droneTask(const byte cmd, const byte value) {
             Serial.print(INVALID_INPUT);
         }
         break;
-    case TRNSTR:
-        if (value) {
-            if (digitalRead(5) == LOW) {
-                digitalWrite(5, HIGH);
-            }
-            else digitalWrite(5, LOW);
-            Serial.print(CMD_SUCCESS);
-        }
-        else {
-            Serial.print(INVALID_INPUT);
-        }
-        break;
-    case WHEEL_L:
-        thumperTranslate(0xFF, value, 0);
-        Serial.print(CMD_SUCCESS);
-        break;
-    case WHEEL_R:
-        thumperTranslate(0xFF, 0, value);
-        Serial.print(CMD_SUCCESS);
-        break;
-    case RWHEEL_L:
-        thumperTranslate(0x00, value, 0);
-        Serial.print(CMD_SUCCESS);
-        break;
-    case RWHEEL_R:
-        thumperTranslate(0x00, 0, value);
-        Serial.print(CMD_SUCCESS);
-        break;
+
     default:
         Serial.print(INVALID_CMD);
         break;
@@ -118,27 +91,27 @@ void droneTask(const byte cmd, const byte value) {
 
 void automove() {
     while (automoveFlag) {
-        // РµСЃР»Рё РЅР° РѕРґРЅРѕРј РёР· РїСЂР°РІС‹С… РґР°С‚С‡РёРєРѕРІ РµСЃС‚СЊ СЃРёРіРЅР°Р», С‚Рѕ РґСЂРѕРЅ РїРѕРІРѕСЂР°С‡РёРІР°РµС‚ РІРїСЂР°РІРѕ
+        // если на одном из правых датчиков есть сигнал, то дрон поворачивает вправо
         if (((digitalRead(IR_RIGHT_1) == HIGH) || (digitalRead(IR_RIGHT_2) == HIGH)) && (digitalRead(IR_LEFT_1) == LOW) && (digitalRead(IR_LEFT_2) == LOW)) { 
-            thumperTranslate(0xF0, 75, 75);
+            thumperTranslate(75, -75, 75, -75);
        }
-        // РµСЃР»Рё РЅР° РѕРґРЅРѕРј РёР· Р»РµРІС‹С… РґР°С‚С‡РёРєРѕРІ РµСЃС‚СЊ СЃРёРіРЅР°Р», С‚Рѕ РґСЂРѕРЅ РїРѕРІРѕСЂР°С‡РёРІР°РµС‚ РІР»РµРІРѕ
+        // если на одном из левых датчиков есть сигнал, то дрон поворачивает влево
         if (((digitalRead(IR_LEFT_1) == HIGH) || (digitalRead(IR_LEFT_2) == HIGH)) && (digitalRead(IR_RIGHT_1) == LOW) && (digitalRead(IR_RIGHT_2) == LOW)) {
-            thumperTranslate(0x0F, 75, 75);
+            thumperTranslate(-75, 75, -75, 75);
         }
-        // РµСЃР»Рё РЅРё РЅР° РѕРґРЅРѕРј РёР· РґР°С‚С‡РёРєРѕРІ РЅРµС‚ СЃРёРіРЅР°Р»Р°, С‚Рѕ РґСЂРѕРЅ РµРґРµС‚ РїСЂСЏРјРѕ
+        // если ни на одном из датчиков нет сигнала, то дрон едет прямо
         if ((digitalRead(IR_RIGHT_1) == LOW) && (digitalRead(IR_RIGHT_2) == LOW) && (digitalRead(IR_LEFT_1) == LOW) && (digitalRead(IR_LEFT_2) == LOW)) {
-            thumperTranslate(0xFF, 75, 75);
+            thumperTranslate(75, 75, 75, 75);
         }
     }
 }
 
-void thumperTranslate(byte dir, byte l, byte r) {
-    thumperMsg[0] = dir; // РќР°РїСЂР°РІР»РµРЅРёРµ РґРІРёР¶РµРЅРёСЏ: FF - РѕР±Р° СЂСЏРґР° РІРїРµСЂС‘Рґ, 00 - РѕР±Р° РЅР°Р·Р°Рґ, F0 - Р»РµРІС‹Р№ СЂСЏРґ РІРїРµСЂС‘Рґ, 0F - РїСЂР°РІС‹Р№ СЂСЏРґ РІРїРµСЂС‘Рґ 
-    thumperMsg[1] = l; // СЃРєРѕСЂРѕСЃС‚СЊ Р»РµРІС‹С… РєРѕР»РµСЃ
-    thumperMsg[2] = r; // СЃРєРѕСЂРѕСЃС‚СЊ РїСЂР°РІС‹С… РєРѕР»РµСЃ
+void thumperTranslate(char fr, char fl, char rr, char rl) {
+    // каждый байт отвечает за определённое колесо и каждое значение вставляется в 4х байтовое число
+    thumperMsg = ((thumperMsg & 0xFF000000) & (fr << 24)) | ((thumperMsg & 0x00FF0000) & (fl << 16)) | ((thumperMsg & 0x0000FF00) & (rr << 8)) | ((thumperMsg & 0x000000FF) & rl);
+    // затем это число передается на плату тампера
     if (Serial1.available() > 0) {
-        for (int i=0; i<3; i++) Serial1.print(thumperMsg[i]);
+        Serial1.print(thumperMsg);
     }
     else Serial.print(THUMPER_CONNECTION_FAILURE);
 }
