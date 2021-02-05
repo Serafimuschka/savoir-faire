@@ -1,126 +1,270 @@
-;-------------------------------;
-;   Drone terminal application  ;
-;         Revision 0001         ;
-;-------------------------------;
-;Developed and edited by toqsycc;
-;-------------------------------;
-;Dec 2020 - Feb 2021 (c) toqsycc;
-;-------------------------------;
-include "macros.inc"            ;
-                                ;
-MEOS_APP_START                  ; PROGRAM BEGIN MACROS
-                                ;
-CODE                            ; PROGRAM CODE BLOCK
-                                ;
-redraw:                         ; Window redrawing
-   call draw_window             ; Calling draw_window proc
-                                ;
-wait_event:                     ; Waiting for an system event
-   mov eax, 10                  ; \ Calling SysFn10: Infinite waiting
-   mcall                        ; /
-   cmp eax, 1                   ; \ If SysEvent = 1, then
-   je redraw                    ; / redraw window
-   cmp eax, 2                   ; \ If SysEvent = 2, then
-   je key                       ; / process pressed key
-   mcall -1                     ; Else end process
-                                ;
-   jmp wait_event               ; Returning back
-                                ;
-camera_dec:                     ; Switch camera num, backward
-   mov al, [numCamera]          ; Move numCamera value to AL register
-   cbw                          ; Convert BYTE to WORD
-   dec ax                       ; Decrement value of DX register
-   mov [numCamera], ah          ; Move AH register value to numCamera
-   jmp feedback                 ; Return to processing
-                                ;
-camera_inc:                     ; Switch camera num, forward
-   mov al, [numCamera]          ; Move numCamera value to AL register
-   cbw                          ; Convert BYTE to WORD
-   inc ax                       ; Increment value of DX register
-   mov [numCamera], ah          ; Move AH register value to numCamera
-   jmp feedback                 ; Return to processing
-                                ;
-key:                            ; Getting an ASCII number of pressed key
-   mcall 2                      ; Calling SysFn02: Pressed key code
-   mov [keyid], ah              ; Move AH register value to keyid
-   mov ebp, keyid               ; Move keyid value to EBP register
-   cmp ebp, 45                  ; Compare EBP value with 45 (-)
-   je camera_dec                ; If EBP = 45 then jump to camera_dec, else continue
-   cmp ebp, 43                  ; Compare EBP value with 43 (+)
-   je camera_inc                ; If EBP = 43 then jump to camera_inc, else continue
-feedback:                       ; Camera_dec and camera_inc returning point
-   call draw_window             ; Calling draw_window proc
-   jmp wait_event               ; Wait for an system event
-                                ;
-draw_window:                    ; Drawing a window
-   mov eax, 12                  ; \
-   mov ebx, 1                   ; | Calling SysFn12: Window redraw, begin
-   mcall                        ; /
-                                ;
-   mov eax, 0                   ; \ Calling SysFn00: Window definition
-   mov ebx, 0 * 65536 + 1023    ; | X start position (0) and X-width (1023)
-   mov ecx, 0 * 65536 + 767     ; | Y start position (0) and Y-height (767)
-   mov edx, wstyle              ; | Window style, 0xXYRRGGBB
-   mov esi, wheader             ; | Header color, 0xXYRRGGBB
-   mov edi, wframe              ; | Frame color, 0x00RRGGBB
-   mcall                        ; /
-                                ;
-   mov eax, 71                  ; \ Calling SysFn71: Window header
-   mov ebx, 2                   ; | Use string address without codepage
-   mov ecx, header              ; | String address
-   mov edx, 1                   ; | Codepage
-   mcall                        ; /
-                                ;
-   mov eax, 4                   ; \ Calling SysFn04: Text writing
-   mov ebx, 30 * 65536 + 10     ; | X start position and Y start position
-   mov ecx, tstyle              ; | Text style, 0xXXRRGGBB
-   mov edx, string              ; | String begin address
-   mcall                        ; /
-                                ;
-   ;----------------------------;
-   ;     Graphics functions     ;
-   ;----------------------------;
-                                ;
-;  mov eax, 13                  ; \ Calling SysFn13: Rect drawing
-;  mov ebx, 5 * 65536 + 1012    ; | X start position (5) and X-width (1012)
-;  mov ecx, 5 * 65536 + 50      ; | Y start position (5) and Y-height (50)
-;  mov edx, 0xFFFFFF            ; | Rect color, 0xRRGGBB
-;  mcall                        ; /
-                                ;
-;  mov eax, 38                  ; \ Calling SysFn38: Line Drawing
-;  mov ebx, 5 * 65536 + 1012    ; | X start position (5) and X end position (1012)
-;  mov ecx, 5 * 65536 + 50      ; | Y start position (5) and Y end position (50)
-;  mov edx, 0x00FFFFFF          ; | Line color, 0x00RRGGBB
-;  mcall                        ; /
-                                ;
-   ;----------------------------;
-   ;      Antenna drawings      ;
-   ;----------------------------;
-                                ;
-   mov eax, 38                  ;
-   mov ebx, 810 * 65536 + 810   ;
-   mov ecx, 10 * 65536 + 26     ;
-   mov edx, connect_good        ;
-   mcall                        ;
-                                ;
-   mov ebx, 804 * 65536 + 816   ;
-   mov ecx, 10 * 65536 + 10     ;
-   mcall                        ;
-                                ;
-   mov ebx, 804 * 65536 + 810   ;
-   mov ecx, 10 * 65536 + 16     ;
-   mcall                        ;
-                                ;
-   mov ebx, 816 * 65536 + 810   ;
-   mcall                        ;
-                                ;
+;---------------------------------------------------------------------------------------------------;
+;                                     Drone terminal application                                    ;
+;                                           Revision 0001                                           ;
+;---------------------------------------------------------------------------------------------------;
+;                                  Developed and edited by toqsycc                                  ;
+;---------------------------------------------------------------------------------------------------;
+;                                  Dec 2020 - Feb 2021 (c) toqsycc                                  ;
+;---------------------------------------------------------------------------------------------------;
+include "kolibrios/macros.inc"                                                 ; ADDITIVE LIBRARIES ;
+                                                                                                    ;
+MEOS_APP_START                                                               ; PROGRAM BEGINS HERE  ;
+                                                                                                    ;
+CODE                                                                                  ; CODE BLOCK  ;
+                                                                                                    ;
+;---------------------------------------------------------------------------------------------------;
+;                                      STRUCT AND CONST BLOCK                                       ;
+;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
+struct INTERFACEPOS                                                    ; Interface Positions struct ;
+   framex                  dd ?                                        ; Frame position (in window) ;
+   framey                  dd ?                                                                     ;
+   campicpos               dd ?                                                                     ;
+   campicsz                dd ?                                                                     ;
+   campictxpos             dd ?                                                                     ;
+   campicnpos              dd ?                                                                     ;
+   cmdfrpos                dd ?                                                                     ;
+   cmdfrsz                 dd ?                                                                     ;
+   antennapos              dd ?                                                                     ;
+   antennasz               dd ?                                                                     ;
+   batterypos              dd ?                                                                     ;
+   batterysz               dd ?                                                                     ;
+   catimppos               dd ?                                                                     ;
+   cataddpos               dd ?                                                                     ;
+   catdronepos             dd ?                                                                     ;
+ends                                                                                                ;
+                                                                                                    ;
+struct INTERFACECLR                                                                                 ;
+   frameclr                dd ?                                                                     ;
+   campic1                 dd ?                                                                     ;
+   campic2                 dd ?                                                                     ;
+   campic3                 dd ?                                                                     ;
+   campic4                 dd ?                                                                     ;
+   campic5                 dd ?                                                                     ;
+   campic6                 dd ?                                                                     ;
+   campic7                 dd ?                                                                     ;
+   cmdhistory              dd ?                                                                     ;
+   cmdlatest               dd ?                                                                     ;
+   cmdcurrent              dd ?                                                                     ;
+   antennabad              dd ?                                                                     ;
+   antennamid              dd ?                                                                     ;
+   antennagood             dd ?                                                                     ;
+   catgclr                 dd ?                                                                     ;
+   sttsidle                dd ?                                                                     ;
+   sttsactive              dd ?                                                                     ;
+   sttsdanger              dd ?                                                                     ;
+   sttsdamage              dd ?                                                                     ;
+ends                                                                                                ;
+                                                                                                    ;
+WINDOWSIZEX = 1024                                                                                  ;
+WINDOWSIZEY = 768                                                                                   ;                                                                                                    ;
+                                                                                                    ;
+configure:                                                                                          ;
+   mov [IFCPs + INTERFACEPOS.framex],            5                    shl 16   + (WINDOWSIZEX - 6)  ;
+   mov [IFCPs + INTERFACEPOS.framey],            5                    shl 16   + 45                 ;
+   mov [IFCPs + INTERFACEPOS.campicpos],         140                  shl 16   + 50                 ;
+   mov [IFCPs + INTERFACEPOS.campicsz],          644                  shl 16   + 480                ;
+   mov [IFCPs + INTERFACEPOS.campictxpos],       370                  shl 16   + 275                ;
+   mov [IFCPs + INTERFACEPOS.campicnpos],        654                  shl 16   + 505                ;
+   mov [IFCPs + INTERFACEPOS.cmdfrpos],          10                   shl 16   + 10                 ;
+   mov [IFCPs + INTERFACEPOS.cmdfrsz],           (WINDOWSIZEX - 20)   shl 16   + 40                 ;
+                                                                                                    ;
+   mov [IFCLs + INTERFACECLR.frameclr],          0x00FF0000                                         ;
+   mov [IFCLs + INTERFACECLR.campic1],           0x00FFFFFF                                         ;
+   mov [IFCLs + INTERFACECLR.campic2],           0x00FFFF00                                         ;
+   mov [IFCLs + INTERFACECLR.campic3],           0x0000FFFF                                         ;
+   mov [IFCLs + INTERFACECLR.campic4],           0x0000FF00                                         ;
+   mov [IFCLs + INTERFACECLR.campic5],           0x00FF00FF                                         ;
+   mov [IFCLs + INTERFACECLR.campic6],           0x00FF0000                                         ;
+   mov [IFCLs + INTERFACECLR.campic7],           0x000000FF                                         ;
+   mov [IFCLs + INTERFACECLR.cmdhistory],        0x80646464                                         ;
+   mov [IFCLs + INTERFACECLR.cmdlatest],         0x80FF9600                                         ;
+   mov [IFCLs + INTERFACECLR.cmdcurrent],        0x8000FF00                                         ;
+   mov [IFCLs + INTERFACECLR.antennabad],        0x00FF0000                                         ;
+   mov [IFCLs + INTERFACECLR.antennamid],        0x00FFFF00                                         ;
+   mov [IFCLs + INTERFACECLR.antennagood],       0x0000FF00                                         ;
+   mov [IFCLs + INTERFACECLR.catgclr],           0x80FFFFFF                                         ;
+   mov [IFCLs + INTERFACECLR.sttsidle],          0x80646464                                         ;
+   mov [IFCLs + INTERFACECLR.sttsactive],        0x80FF9600                                         ;
+   mov [IFCLs + INTERFACECLR.sttsdanger],        0x80FFA000                                         ;
+   mov [IFCLs + INTERFACECLR.sttsdamage],        0x80FF3232                                         ;
+                                                                                                    ;
+;---------------------------------------------------------------------------------------------------;
+;                                         MAIN PROGRAM BLOCK                                        ;
+;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
+redraw:                                                    ; Window redrawing                       ;
+   call draw_window                                        ; Calling draw_window proc               ;
+                                                                                                    ;
+wait_event:                                                ; Waiting for an system event            ;
+   mov eax, 10                                             ; \ Calling SysFn10: Infinite waiting    ;
+   mcall                                                   ; /                                      ;
+   cmp eax, 1                                              ; \ If SysEvent = 1, then                ;
+   je redraw                                               ; / redraw window                        ;
+   cmp eax, 2                                              ; \ If SysEvent = 2, then                ;
+   je key                                                  ; / process pressed key                  ;
+   mcall -1                                                ; Else end process                       ;
+   jmp wait_event                                          ; Returning back                         ;
+                                                                                                    ;
+key:                                                       ; Getting an ASCII number of pressed key ;
+   mcall 2                                                 ; Calling SysFn02: Pressed key code      ;
+   mov [keyid], ah                                         ; Move AH register value to keyid        ;
+   mov ebp, keyid                                          ; Move keyid value to EBP register       ;
+   cmp ebp, 45                                             ; Compare EBP value with 45 (-)          ;
+   je @cam_dec                                             ; If EBP = 45 then cam_dec, else continue;
+   cmp ebp, 43                                             ; Compare EBP value with 43 (+)          ;
+   je @cam_inc                                             ; If EBP = 43 then cam_inc, else continue;
+@feedback:                                                 ; Cam_dec and cam_inc returning point    ;
+   call draw_window                                        ; Calling draw_window proc               ;
+   jmp wait_event                                          ; Wait for an system event               ;
+@cam_dec:                                                  ; Switch camera num, backward            ;
+   mov al, [numCamera]                                     ; Move numCamera value to AL register    ;
+   cbw                                                     ; Convert BYTE to WORD                   ;
+   dec ax                                                  ; Decrement value of DX register         ;
+   mov [numCamera], ah                                     ; Move AH register value to numCamera    ;
+   jmp @feedback                                           ; Return to processing                   ;
+@cam_inc:                                                  ; Switch camera num, forward             ;
+   mov al, [numCamera]                                     ; Move numCamera value to AL register    ;
+   cbw                                                     ; Convert BYTE to WORD                   ;
+   inc ax                                                  ; Increment value of DX register         ;
+   mov [numCamera], ah                                     ; Move AH register value to numCamera    ;
+   jmp @feedback                                           ; Return to processing                   ;
+                                                                                                    ;
+draw_window:                                               ; Drawing a window                       ;
+   mov eax, 12                                             ; \                                      ;
+   mov ebx, 1                                              ; | Calling SysFn12: Window redraw, begin;
+   mcall                                                   ; /                                      ;
+                                                                                                    ;
+   mov eax, 0                                              ; \ Calling SysFn00: Window definition   ;
+   mov ebx, 0 shl 16 + (WINDOWSIZEX - 1)                   ; | X start position and width           ;
+   mov ecx, 0 shl 16 + (WINDOWSIZEY - 1)                   ; | Y start position and height          ;
+   mov edx, wstyle                                         ; | Window style, 0xXYRRGGBB             ;
+   mov esi, wheader                                        ; | Header color, 0xXYRRGGBB             ;
+   mov edi, wframe                                         ; | Frame color, 0x00RRGGBB              ;
+   mcall                                                   ; /                                      ;
+                                                                                                    ;
+   mov eax, 71                                             ; \ Calling SysFn71: Window header       ;
+   mov ebx, 2                                              ; | Use string address without codepage  ;
+   mov ecx, header                                         ; | String address                       ;
+   mov edx, 1                                              ; | Codepage                             ;
+   mcall                                                   ; /                                      ;
+                                                                                                    ;
+   mov eax, 4                                              ; \ Calling SysFn04: Text writing        ;
+   mov ebx, 30 shl 16 + 10                                 ; | X and Y start position               ;
+   mov ecx, tstyle                                         ; | Text style, 0xXXRRGGBB               ;
+   mov edx, string                                         ; | String begin address                 ;
+   mcall                                                   ; /                                      ;
+                                                                                                    ;
+                                                           ;----------------------------------------;
+                                                           ;           Graphics functions           ;
+                                                           ;----------------------------------------;
+                                                                                                    ;
+;  mov eax, 13                                             ; \ Calling SysFn13: Rect drawing        ;
+;  mov ebx, 5 shl 16 + 1012                                ; | X start position and width           ;
+;  mov ecx, 5 shl 16 + 50                                  ; | Y start position and height          ;
+;  mov edx, 0xFFFFFF                                       ; | Rect color, 0xRRGGBB                 ;
+;  mcall                                                   ; /                                      ;
+                                                                                                    ;
+;  mov eax, 38                                             ; \ Calling SysFn38: Line Drawing        ;
+;  mov ebx, 5 shl 16 + 1012                                ; | X start and end position             ;
+;  mov ecx, 5 shl 16 + 50                                  ; | Y start and end position             ;
+;  mov edx, 0x00FFFFFF                                     ; | Line color, 0x00RRGGBB               ;
+;  mcall                                                   ; /                                      ;
+                                                                                                    ;
+                                                           ;----------------------------------------;
+                                                           ;            Antenna drawings            ;
+                                                           ;----------------------------------------;
+                                                                                                    ;
+antenna_draw:                                              ; Antenna icon drawer function           ;
+.body:                                                     ; Drawing a body                         ;
+   mov eax, 38                                                                                      ;
+   mov ebx, 810    shl 16 + 810                                                                     ;
+   mov ecx, 10     shl 16 + 26                                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 804    shl 16 + 816                                                                     ;
+   mov ecx, 10     shl 16 + 10                                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 804    shl 16 + 810                                                                     ;
+   mov ecx, 10     shl 16 + 16                                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 816    shl 16 + 810                                                                     ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov edx, [IFCLs + INTERFACECLR.sttsidle]                                                         ;
+   mov ebx, 816    shl 16 + 816                                                                     ;
+   mov ecx, 26     shl 16 + 18                                                                      ;
+   mcall                                                                                            ;
+   mov ebx, 824    shl 16 + 824                                                                     ;
+   mov ecx, 26     shl 16 + 14                                                                      ;
+   mcall                                                                                            ;
+   mov ebx, 832    shl 16 + 832                                                                     ;
+   mov ecx, 26     shl 16 + 10                                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   cmp [signalLevel], 0                                                                             ;
+   je  .nosignal                                                                                    ;
+   cmp [signalLevel], 170                                                                           ;
+   ja  .good                                                                                        ;
+   cmp [signalLevel], 85                                                                            ;
+   ja  .normal                                                                                      ;
+   jmp .bad                                                                                         ;
+                                                                                                    ;
+.bad:                                                      ; Drawing if bad signal                  ;
+   mov ebx, 816    shl 16 + 816                                                                     ;
+   mov ecx, 26     shl 16 + 18                                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
+                                                                                                    ;
+.normal:                                                   ; If signal is normal                    ;
+   mov ebx, 824    shl 16 + 824                                                                     ;
+   mov ecx, 26     shl 16 + 14                                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennamid]                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 816    shl 16 + 816                                                                     ;
+   mov ecx, 26     shl 16 + 18                                                                      ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
+                                                                                                    ;
+.good:                                                     ; If signal is good                      ;
+   mov ebx, 832    shl 16 + 832                                                                     ;
+   mov ecx, 26     shl 16 + 10   ;                                                                  ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 824    shl 16 + 824                                                                     ;
+   mov ecx, 26     shl 16 + 14                                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 816    shl 16 + 816                                                                     ;
+   mov ecx, 26     shl 16 + 18                                                                      ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
+                                                                                                    ;
+.nosignal:                                                 ; If no signal                           ;
+   mov ebx, 804    shl 16 + 832                                                                     ;
+   mov ecx, 10     shl 16 + 26                                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 26     shl 16 + 10                                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   jmp @f                                                                                           ;
+                                                                                                    ;
+@@:                                                                                                 ;
    ;----------------------------;
    ;       Frame drawings       ;
    ;----------------------------;
                                 ; Updated and optimized frame drawer
-   mov ebx, 5 * 65536 + 1017    ; See the syntax on line 90
-   mov ecx, 5 * 65536 + 5       ;
-   mov edx, 0x00323232          ;
+   mov ebx, [IFCPs + INTERFACEPOS.framex]    ; See the syntax on line 90
+   mov ecx, [IFCPs + INTERFACEPOS.framey]       ;
+   mov edx, [IFCLs + INTERFACECLR.frameclr]          ;
    mcall                        ;
 
    mov ecx, 45 * 65536 + 45     ;
@@ -362,6 +506,9 @@ DATA                            ; PROGRAM DATA BLOCK
    ; name        | type | value ;
    ;----------------------------;
                                 ;
+   IFCPs             rd   15
+   IFCLs             rd   19
+
    numCamera         db   49, 0
    header            db   'toqsycc labs : drone terminal mk.1 rev.0', 0
    string            db   'Sample string', 0
@@ -405,6 +552,8 @@ DATA                            ; PROGRAM DATA BLOCK
    trans_fast        db   'Fast', 0
    ping              db   'CONNECTION PING: ', 0
    ping_meas         db   'ms', 0
+
+   signalLevel       db   0
 
                                 ;
    ;----------------------------;
