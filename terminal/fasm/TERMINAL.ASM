@@ -57,7 +57,7 @@ struct INTERFACECLR                                                             
 ends                                                                                                ;
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
-WINDOWSIZEY = 768                                                                                   ;                                                                                                    ;
+WINDOWSIZEY = 768                                                                                   ;
                                                                                                     ;
 configure:                                                                                          ;
    mov [IFCPs + INTERFACEPOS.framex],            5                    shl 16   + (WINDOWSIZEX - 6)  ;
@@ -91,9 +91,9 @@ configure:                                                                      
                                                                                                     ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         MAIN PROGRAM BLOCK                                        ;
-;---------------------------------------------------------------------------------------------------;
-                                                                                                    ;
+;---------------------------------------------------------------------------------------------------;                                                                                                 ;
 redraw:                                                    ; Window redrawing                       ;
+@@:
    call draw_window                                        ; Calling draw_window proc               ;
                                                                                                     ;
 wait_event:                                                ; Waiting for an system event            ;
@@ -109,27 +109,26 @@ wait_event:                                                ; Waiting for an syst
 key:                                                       ; Getting an ASCII number of pressed key ;
    mcall 2                                                 ; Calling SysFn02: Pressed key code      ;
    mov [keyid], ah                                         ; Move AH register value to keyid        ;
-   mov ebp, keyid                                          ; Move keyid value to EBP register       ;
-   cmp ebp, 45                                             ; Compare EBP value with 45 (-)          ;
-   je @cam_dec                                             ; If EBP = 45 then cam_dec, else continue;
-   cmp ebp, 43                                             ; Compare EBP value with 43 (+)          ;
-   je @cam_inc                                             ; If EBP = 43 then cam_inc, else continue;
-@feedback:                                                 ; Cam_dec and cam_inc returning point    ;
-   call draw_window                                        ; Calling draw_window proc               ;
-   jmp wait_event                                          ; Wait for an system event               ;
-@cam_dec:                                                  ; Switch camera num, backward            ;
-   mov al, [numCamera]                                     ; Move numCamera value to AL register    ;
-   cbw                                                     ; Convert BYTE to WORD                   ;
-   dec ax                                                  ; Decrement value of DX register         ;
-   mov [numCamera], ah                                     ; Move AH register value to numCamera    ;
-   jmp @feedback                                           ; Return to processing                   ;
-@cam_inc:                                                  ; Switch camera num, forward             ;
-   mov al, [numCamera]                                     ; Move numCamera value to AL register    ;
-   cbw                                                     ; Convert BYTE to WORD                   ;
-   inc ax                                                  ; Increment value of DX register         ;
-   mov [numCamera], ah                                     ; Move AH register value to numCamera    ;
-   jmp @feedback                                           ; Return to processing                   ;
-                                                                                                    ;
+   cmp [keyid], 45                                             ; Compare EBP value with 45 (-)          ;
+   je .cam_dec                                             ; If EBP = 45 then cam_dec, else continue;
+   cmp [keyid], 43                                             ; Compare EBP value with 43 (+)          ;
+   je .cam_inc                                             ; If EBP = 43 then cam_inc, else continue;
+   jmp @b
+
+.cam_dec:                                                  ; Switch camera num, backward            ;
+   mov bl, [numCamera]
+   dec bl
+   mov [numCamera], bl
+   push ebx
+   jmp @b
+
+.cam_inc:                                                  ; Switch camera num, forward             ;
+   mov bl, [numCamera]                                     ; Move numCamera value to AL register
+   inc bl                                                  ; Increment value of DX register         ;
+   mov [numCamera], bl
+   push ebx                                    ; Move AH register value to numCamera    ;
+   jmp @b
+
 draw_window:                                               ; Drawing a window                       ;
    mov eax, 12                                             ; \                                      ;
    mov ebx, 1                                              ; | Calling SysFn12: Window redraw, begin;
@@ -177,97 +176,98 @@ draw_window:                                               ; Drawing a window   
                                                                                                     ;
 antenna_draw:                                              ; Antenna icon drawer function           ;
 .body:                                                     ; Drawing a body                         ;
-   mov eax, 38                                                                                      ;
-   mov ebx, 810    shl 16 + 810                                                                     ;
-   mov ecx, 10     shl 16 + 26                                                                      ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
-   mcall                                                                                            ;
+   mov eax, 38                                             ;                                        ;
+   mov ebx, 810    shl 16 + 810                            ;                                        ;
+   mov ecx, 10     shl 16 + 26                             ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 804    shl 16 + 816                                                                     ;
-   mov ecx, 10     shl 16 + 10                                                                      ;
-   mcall                                                                                            ;
+   mov ebx, 804    shl 16 + 816                            ;                                        ;
+   mov ecx, 10     shl 16 + 10                             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 804    shl 16 + 810                                                                     ;
-   mov ecx, 10     shl 16 + 16                                                                      ;
-   mcall                                                                                            ;
+   mov ebx, 804    shl 16 + 810                            ;                                        ;
+   mov ecx, 10     shl 16 + 16                             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 816    shl 16 + 810                                                                     ;
-   mcall                                                                                            ;
+   mov ebx, 816    shl 16 + 810                            ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov edx, [IFCLs + INTERFACECLR.sttsidle]                                                         ;
-   mov ebx, 816    shl 16 + 816                                                                     ;
-   mov ecx, 26     shl 16 + 18                                                                      ;
-   mcall                                                                                            ;
-   mov ebx, 824    shl 16 + 824                                                                     ;
-   mov ecx, 26     shl 16 + 14                                                                      ;
-   mcall                                                                                            ;
-   mov ebx, 832    shl 16 + 832                                                                     ;
-   mov ecx, 26     shl 16 + 10                                                                      ;
-   mcall                                                                                            ;
+   mov edx, [IFCLs + INTERFACECLR.sttsidle]                ;                                        ;
+   mov ebx, 816    shl 16 + 816                            ;                                        ;
+   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   cmp [signalLevel], 0                                                                             ;
-   je  .nosignal                                                                                    ;
-   cmp [signalLevel], 170                                                                           ;
-   ja  .good                                                                                        ;
-   cmp [signalLevel], 85                                                                            ;
-   ja  .normal                                                                                      ;
-   jmp .bad                                                                                         ;
+   mov ebx, 824    shl 16 + 824                            ;                                        ;
+   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mcall                                                   ;                                        ;
+                                                                                                    ;
+   mov ebx, 832    shl 16 + 832                            ;                                        ;
+   mov ecx, 26     shl 16 + 10                             ;                                        ;
+   mcall                                                   ;                                        ;
+                                                                                                    ;
+   cmp [signalLevel], 0                                    ;                                        ;
+   je  .nosignal                                           ;                                        ;
+   cmp [signalLevel], 170                                  ;                                        ;
+   ja  .good                                               ;                                        ;
+   cmp [signalLevel], 85                                   ;                                        ;
+   ja  .normal                                             ;                                        ;
+   jmp .bad                                                ;                                        ;
                                                                                                     ;
 .bad:                                                      ; Drawing if bad signal                  ;
-   mov ebx, 816    shl 16 + 816                                                                     ;
-   mov ecx, 26     shl 16 + 18                                                                      ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
+   mov ebx, 816    shl 16 + 816                            ;                                        ;
+   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
+   mcall                                                   ;                                        ;
+   jmp @f                                                  ;                                        ;
                                                                                                     ;
 .normal:                                                   ; If signal is normal                    ;
-   mov ebx, 824    shl 16 + 824                                                                     ;
-   mov ecx, 26     shl 16 + 14                                                                      ;
-   mov edx, [IFCLs + INTERFACECLR.antennamid]                                                       ;
+   mov ebx, 824    shl 16 + 824                            ;                                        ;
+   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.antennamid]              ;                                        ;
    mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, 816    shl 16 + 816                                                                     ;
-   mov ecx, 26     shl 16 + 18                                                                      ;
-   mcall                                                                                            ;
+                                                           ;                                        ;
+   mov ebx, 816    shl 16 + 816                            ;                                        ;
+   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mcall                                                   ;                                        ;
    jmp @f                                                                                           ;
                                                                                                     ;
 .good:                                                     ; If signal is good                      ;
-   mov ebx, 832    shl 16 + 832                                                                     ;
-   mov ecx, 26     shl 16 + 10   ;                                                                  ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
-   mcall                                                                                            ;
+   mov ebx, 832    shl 16 + 832                            ;                                        ;
+   mov ecx, 26     shl 16 + 10   ;                         ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 824    shl 16 + 824                                                                     ;
-   mov ecx, 26     shl 16 + 14                                                                      ;
-   mcall                                                                                            ;
+   mov ebx, 824    shl 16 + 824                            ;                                        ;
+   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 816    shl 16 + 816                                                                     ;
-   mov ecx, 26     shl 16 + 18                                                                      ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
+   mov ebx, 816    shl 16 + 816                            ;                                        ;
+   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mcall                                                   ;                                        ;
+   jmp @f                                                  ;                                        ;
                                                                                                     ;
 .nosignal:                                                 ; If no signal                           ;
-   mov ebx, 804    shl 16 + 832                                                                     ;
-   mov ecx, 10     shl 16 + 26                                                                      ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
-   mcall                                                                                            ;
+   mov ebx, 804    shl 16 + 832                            ;                                        ;
+   mov ecx, 10     shl 16 + 26                             ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
+   mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ecx, 26     shl 16 + 10                                                                      ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   jmp @f                                                                                           ;
+   mov ecx, 26     shl 16 + 10                             ;                                        ;
+   mcall                                                   ;                                        ;
+   jmp @f                                                  ;                                        ;
                                                                                                     ;
 @@:                                                                                                 ;
-   ;----------------------------;
-   ;       Frame drawings       ;
-   ;----------------------------;
-                                ; Updated and optimized frame drawer
-   mov ebx, [IFCPs + INTERFACEPOS.framex]    ; See the syntax on line 90
-   mov ecx, [IFCPs + INTERFACEPOS.framey]       ;
-   mov edx, [IFCLs + INTERFACECLR.frameclr]          ;
-   mcall                        ;
+                                                           ;----------------------------------------;
+                                                           ;             Frame drawings             ;
+                                                           ;----------------------------------------;
+                                                           ; Updated and optimized frame drawer
+   mov ebx, [IFCPs + INTERFACEPOS.framex]                  ; See the syntax on line 90
+   mov ecx, [IFCPs + INTERFACEPOS.framey]                  ;
+   mov edx, [IFCLs + INTERFACECLR.frameclr]                ;
+   mcall                                                   ;
 
-   mov ecx, 45 * 65536 + 45     ;
+   mov ecx, 45 * 65536 + 45                                ;
    mcall
                                 ;
    mov ebx, 1017 * 65536 + 1017 ;
@@ -495,7 +495,7 @@ com_send:                       ; COM port using
    js com_debug                 ; If EAX = 0 then jump to com_debug
                                 ;
 DATA                            ; PROGRAM DATA BLOCK
-   keyid: rb 1                  ; Reserved for pressed key ID's (1 byte)
+   keyid db 0                  ; Reserved for pressed key ID's (1 byte)
                                 ;
    picWidth = 784               ; Const for drawing algorithm
    picHeight = 530              ; Const for drawing algorithm
