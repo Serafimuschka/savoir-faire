@@ -91,15 +91,18 @@ configure:                                                                      
                                                                                                     ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         MAIN PROGRAM BLOCK                                        ;
-;---------------------------------------------------------------------------------------------------;                                                                                                 ;
+;---------------------------------------------------------------------------------------------------;
 redraw:                                                    ; Window redrawing                       ;
 @@:
    call draw_window                                        ; Calling draw_window proc               ;
                                                                                                     ;
 wait_event:                                                ; Waiting for an system event            ;
-   mov eax, 10                                             ; \ Calling SysFn10: Infinite waiting    ;
+   mov eax, 23                                             ; \ Calling SysFn10: Infinite waiting    ;
+   mov ebx, 100
    mcall                                                   ; /                                      ;
-   cmp eax, 1                                              ; \ If SysEvent = 1, then                ;
+   cmp eax, 0                                              ; \ If SysEvent = 1, then                ;
+   je redraw
+   cmp eax, 1
    je redraw                                               ; / redraw window                        ;
    cmp eax, 2                                              ; \ If SysEvent = 2, then                ;
    je key                                                  ; / process pressed key                  ;
@@ -129,7 +132,24 @@ key:                                                       ; Getting an ASCII nu
    push ebx                                    ; Move AH register value to numCamera    ;
    jmp @b
 
+random_byte:
+@getSeed:
+   rdtsc
+   mov [generatorSeed], eax
+   mov edx, 0
+
+   cmp [generatorSeed], 0
+   je @getSeed
+
+   mov ebx, 255
+   div ebx
+   mov [generatorSeed], edx
+
+   jmp @f
+
+
 draw_window:                                               ; Drawing a window                       ;
+
    mov eax, 12                                             ; \                                      ;
    mov ebx, 1                                              ; | Calling SysFn12: Window redraw, begin;
    mcall                                                   ; /                                      ;
@@ -144,7 +164,7 @@ draw_window:                                               ; Drawing a window   
                                                                                                     ;
    mov eax, 71                                             ; \ Calling SysFn71: Window header       ;
    mov ebx, 2                                              ; | Use string address without codepage  ;
-   mov ecx, header                                         ; | String address                       ;
+   mov ecx, generatorSeed                                         ; | String address                       ;
    mov edx, 1                                              ; | Codepage                             ;
    mcall                                                   ; /                                      ;
                                                                                                     ;
@@ -172,8 +192,7 @@ draw_window:                                               ; Drawing a window   
                                                                                                     ;
                                                            ;----------------------------------------;
                                                            ;            Antenna drawings            ;
-                                                           ;----------------------------------------;
-                                                                                                    ;
+                                                           ;----------------------------------------;                                                                                                    ;
 antenna_draw:                                              ; Antenna icon drawer function           ;
 .body:                                                     ; Drawing a body                         ;
    mov eax, 38                                             ;                                        ;
@@ -206,11 +225,14 @@ antenna_draw:                                              ; Antenna icon drawer
    mov ecx, 26     shl 16 + 10                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   cmp [signalLevel], 0                                    ;                                        ;
+   ;cmp [signalLevel], 0                                    ;                                        ;
+   cmp [generatorSeed], 0
    je  .nosignal                                           ;                                        ;
-   cmp [signalLevel], 170                                  ;                                        ;
+   ;cmp [signalLevel], 170                                  ;                                        ;
+   cmp [generatorSeed], 170
    ja  .good                                               ;                                        ;
-   cmp [signalLevel], 85                                   ;                                        ;
+   ;cmp [signalLevel], 85                                   ;                                        ;
+   cmp [generatorSeed], 85
    ja  .normal                                             ;                                        ;
    jmp .bad                                                ;                                        ;
                                                                                                     ;
@@ -284,36 +306,40 @@ antenna_draw:                                              ; Antenna icon drawer
    ;----------------------------;
    ;   Camera pic placeholder   ; Drawing a placeholder with size 644x480
    ;----------------------------;
-                                ;
-   mov eax, 13                  ; Updated and optimized placeholder drawer
-   mov ebx, 692 * 65536 + 92    ; See the syntax on line 84
-   mov ecx, 50 * 65536 + 480    ;
-   mov edx, 0x000000FF          ;
-   mcall                        ;
-                                ;
-   mov ebx, 600 * 65536 + 92    ;
-   mov edx, 0x00FF0000          ;
-   mcall                        ;
-                                ;
-   mov ebx, 508 * 65536 + 92    ;
-   mov edx, 0x00FF00FF          ;
-   mcall                        ;
-                                ;
-   mov ebx, 416 * 65536 + 92    ;
-   mov edx, 0x0000FF00          ;
-   mcall                        ;
-                                ;
-   mov ebx, 324 * 65536 + 92    ;
-   mov edx, 0x0000FFFF          ;
-   mcall                        ;
-                                ;
-   mov ebx, 232 * 65536 + 92    ;
-   mov edx, 0x00FFFF00          ;
-   mcall                        ;
-                                ;
-   mov ebx, 140 * 65536 + 92    ;
+   ;
+
+   mov ecx, 530
+@newLine:
+   mov ebx, 784
+@newPixel:
+   rdtsc
+   mov [generatorSeed], eax
+   mov edx, 0
+
+   mov ebp, 255
+   div ebp
+   mov [generatorSeed], edx
+
+   mov ebp, [generatorSeed]
    mov edx, 0x00FFFFFF          ;
-   mcall                        ;
+   xor edx, ebp
+   mov ebp, [generatorSeed - 1]
+   xor edx, ebp
+   mov ebp, [generatorSeed - 2]
+   xor edx, ebp
+
+   mov eax, 1
+   mcall
+
+   dec ebx
+   cmp ebx, 140
+   jne @newPixel
+@up:
+   dec ecx
+   cmp ecx, 50
+   jne @newLine
+
+
                                 ;
    ;----------------------------;
    ;        Other frames        ;
@@ -352,6 +378,10 @@ antenna_draw:                                              ; Antenna icon drawer
    mov edx, cam                 ; | String begin address
    mov edi, 0x00000000          ; | Font background color, 0x00RRGGBB
    mcall                        ; /
+
+   mov ebx, [IFCPs + INTERFACEPOS.campictxpos]
+   mov edx, signal
+   mcall
                                 ;
    mov ebx, 768 * 65536 + 505   ; Move to EBX register XY coordinate
    mov edx, numCamera           ; Move to EDX register string address
@@ -554,6 +584,7 @@ DATA                            ; PROGRAM DATA BLOCK
    ping_meas         db   'ms', 0
 
    signalLevel       db   0
+   generatorSeed     dd   0, 0
 
                                 ;
    ;----------------------------;
