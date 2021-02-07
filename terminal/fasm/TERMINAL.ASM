@@ -65,6 +65,7 @@ struct WNDPRM                                                                   
    style                  dd ?                                                                      ;
    header                 dd ?                                                                      ;
    frame                  dd ?                                                                      ;
+   txtcolor               dd ?                                                                      ;
 ends                                                                                                ;
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
@@ -80,6 +81,8 @@ configure:                                                                      
    mov [IFCPs + INTERFACEPOS.cmdfrpos],          10                   shl 16   + 10                 ;
    mov [IFCPs + INTERFACEPOS.cmdfrsz],           (WINDOWSIZEX - 20)   shl 16   + 40                 ;
                                                                                                     ;
+   mov [IFCLs + INTERFACECLR.accent],            0x00FF8615                                         ;
+   mov [IFCLs + INTERFACECLR.background],        0x000F0F0F                                         ;
    mov [IFCLs + INTERFACECLR.frameclr],          0x00A0A0A0                                         ;
    mov [IFCLs + INTERFACECLR.campic1],           0x00FFFFFF                                         ;
    mov [IFCLs + INTERFACECLR.campic2],           0x00FFFF00                                         ;
@@ -99,8 +102,6 @@ configure:                                                                      
    mov [IFCLs + INTERFACECLR.sttsactive],        0x80FF9600                                         ;
    mov [IFCLs + INTERFACECLR.sttsdanger],        0x80FFA000                                         ;
    mov [IFCLs + INTERFACECLR.sttsdamage],        0x80FF3232                                         ;
-   mov [IFCLs + INTERFACECLR.accent],            0x00FF8615                                         ;
-   mov [IFCLs + INTERFACECLR.background],        0x000F0F0F                                         ;
    mov [IFCLs + INTERFACECLR.batbgclr],          0x00555555                                         ;
    mov [IFCLs + INTERFACECLR.batfrclr],          0x00C8C8C8                                         ;
    mov [IFCLs + INTERFACECLR.batclr],            0x00FF8615                                         ;
@@ -108,6 +109,7 @@ configure:                                                                      
    mov [WPs + WNDPRM.style],                     0x30000000                                         ;
    mov [WPs + WNDPRM.header],                    0x01000000                                         ;
    mov [WPs + WNDPRM.frame],                     0x00000000                                         ;
+   mov [WPs + WNDPRM.txtcolor],                  0x80000000                                         ;
                                                                                                     ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         MAIN PROGRAM BLOCK                                        ;
@@ -226,7 +228,7 @@ battery:                                                                        
    mov eax, 13                                                                                      ;
    mov ebx, (WINDOWSIZEX - 57) shl 16 + 50                                                          ;
    mov ecx, 3 shl 16 + 16                                                                           ;
-   mov edx, 0x555555                                                                                ;
+   mov edx, [IFCLs + INTERFACECLR.batbgclr]                                                         ;
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, (WINDOWSIZEX - 7) shl 16 + 4                                                            ;
@@ -237,7 +239,7 @@ battery:                                                                        
 .body:                                                                                              ;
    mov ebx, (WINDOWSIZEX - 56) shl 16 + 48                                                          ;
    mov ecx, 4 shl 16 + 14                                                                           ;
-   mov edx, 0xC8C8C8                                                                                ;
+   mov edx, [IFCLs + INTERFACECLR.batfrclr]                                                         ;
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, (WINDOWSIZEX - 6) shl 16 + 2                                                            ;
@@ -248,7 +250,7 @@ battery:                                                                        
    mov ebx, (WINDOWSIZEX - 55) shl 16 + 46                                                          ;
    mov bx, [batteryCharge]                                                                          ;
    mov ecx, 5 shl 16 + 12                                                                           ;
-   mov edx, 0xFF8615                                                                                ;
+   mov edx, [IFCLs + INTERFACECLR.batclr]                                                           ;
    mcall                                                                                            ;
                                                                                                     ;
 ;==========================================================;----------------------------------------;
@@ -347,7 +349,8 @@ antenna_draw:                                              ; Antenna icon drawer
                                                                                                     ;
    mov eax, 4                                                                                       ;
    mov ebx, (WINDOWSIZEX - 98)  shl 16 + 3                                                          ;
-   mov ecx, [IFCLs + INTERFACECLR.accent]                                                           ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [IFCLs + INTERFACECLR.accent]                                                           ;
    mov edx, prot_dp40                                                                               ;
    mcall                                                                                            ;
                                                                                                     ;
@@ -905,7 +908,7 @@ DATA                            ; PROGRAM DATA BLOCK
                                 ;
    IFCPs             rd   15
    IFCLs             rd   24
-   WPs               rd   3
+   WPs               rd   4
 
    numCamera         db   49, 0
    header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
