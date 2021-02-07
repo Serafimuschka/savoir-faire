@@ -467,6 +467,7 @@ draw_window:                                               ; Drawing a window   
 ;==========================================================;             Text drawing               ;
 ;==========================================================;----------------------------------------;
 
+   mov [bufferN], fg_work
    mov edx, [FGs + FLAG.stat_on]
    mov ebp, [FGs + FLAG.size]
    mov edi, (WINDOWSIZEX - 501) shl 16 + 512
@@ -475,6 +476,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgwork:
 
+   mov [bufferN], fg_rf
    mov edx, [FGs + FLAG.stat_on]
    mov edi, (WINDOWSIZEX - 425) shl 16 + 512
    mov esi, @fgrf
@@ -482,6 +484,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgrf:
 
+   mov [bufferN], fg_bat
    mov edx, [FGs + FLAG.stat_off]
    mov edi, (WINDOWSIZEX - 349) shl 16 + 512
    mov esi, @fgbat
@@ -489,6 +492,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgbat:
 
+   mov [bufferN], fg_prot
    mov edx, [FGs + FLAG.stat_idle]
    mov edi, (WINDOWSIZEX - 501) shl 16 + 530
    mov esi, @fgprot
@@ -496,6 +500,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgprot:
 
+   mov [bufferN], fg_fdbk
    mov edx, [FGs + FLAG.stat_dang]
    mov edi, (WINDOWSIZEX - 425) shl 16 + 530
    mov esi, @fgfdbk
@@ -667,7 +672,7 @@ DrawFlag:
    add ebx, 10 shl 16
    mov ecx, [WPs + WNDPRM.txtcolor]
    xor ecx, [bufferW2]
-   mov edx, fg_work
+   mov edx, [bufferN]
    mcall
 
    jmp esi                                                                                          ;
@@ -756,11 +761,16 @@ DATA                            ; PROGRAM DATA BLOCK
 
    fg_warn           db   '!', 0
    fg_work           db   'WORK', 0
+   fg_rf             db   'RF', 0
+   fg_bat            db   'BAT', 0
+   fg_prot           db   'PROT', 0
+   fg_fdbk           db   'FDBK', 0
 
    signalLevel       db   0
    pingValue         db   0
    generatorSeed     dd   0
    batteryCharge     dw   40
+   bufferN           dd   0
    bufferS           dw   0
    bufferW           dd   0
    bufferW2          dd   0
