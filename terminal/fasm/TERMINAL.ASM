@@ -68,6 +68,50 @@ struct WNDPRM                                                                   
    frame                  dd ?                                                                      ;
    txtcolor               dd ?                                                                      ;
 ends                                                                                                ;
+
+struct FLAG
+   width                  dd ?
+   height                 dd ?
+   size                   dd ?
+   warnpos                dd ?
+   warnclr                dd ?
+   stat_na                dd ?
+   stat_off               dd ?
+   stat_on                dd ?
+   stat_act               dd ?
+   stat_idle              dd ?
+   stat_dang              dd ?
+   stat_nr                dd ?
+ends
+
+struct EFLAG
+   fg_work                dd ?
+   fg_rf                  dd ?
+   fg_bat                 dd ?
+   fg_prot                dd ?
+   fg_fdbk                dd ?
+   fg_com                 dd ?
+   fg_spdt                dd ?
+   fg_tire                dd ?
+   fg_aer                 dd ?
+   fg_eng                 dd ?
+   fg_dmgd                dd ?
+   fg_stat                dd ?
+   fg_ctrl                dd ?
+   fg_mnpl                dd ?
+   fg_vid                 dd ?
+   fg_rcom                dd ?
+   fg_scty                dd ?
+   fg_mvmt                dd ?
+   fg_idl                 dd ?
+   fg_lig                 dd ?
+   fg_lasr                dd ?
+   fg_warn                dd ?
+   fg_snd                 dd ?
+   fg_jmr                 dd ?
+   fg_spec                dd ?
+ends
+
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
 WINDOWSIZEY = 768                                                                                   ;
@@ -925,6 +969,8 @@ DATA                            ; PROGRAM DATA BLOCK
    IFCPs             rd   15
    IFCLs             rd   24
    WPs               rd   4
+   FGs               rd   12
+   FGe               rd   25
 
    numCamera         db   49, 0
    header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
@@ -983,12 +1029,6 @@ DATA                            ; PROGRAM DATA BLOCK
    ;----------------------------;
    ; name            | value    ;
                                 ;
-   tstyle            =     0x80000000
-   ts_active         =     0x8000FF16
-   ts_idle           =     0x80646464
-   ts_error          =     0x80FF0000
-   ts_danger         =     0x80FF9600
-   ts_category       =     0x80FFFFFF
                                 ;
    mvmt_idle         =     0x00646464
    mvmt_active       =     0x00FF6464
