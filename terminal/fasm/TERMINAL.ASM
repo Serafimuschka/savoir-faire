@@ -35,6 +35,8 @@ struct INTERFACEPOS                                                    ; Interfa
 ends                                                                                                ;
                                                                                                     ;
 struct INTERFACECLR                                                                                 ;
+   accent                  dd ?                                                                     ;
+   background              dd ?                                                                     ;
    frameclr                dd ?                                                                     ;
    campic1                 dd ?                                                                     ;
    campic2                 dd ?                                                                     ;
@@ -54,6 +56,15 @@ struct INTERFACECLR                                                             
    sttsactive              dd ?                                                                     ;
    sttsdanger              dd ?                                                                     ;
    sttsdamage              dd ?                                                                     ;
+   batbgclr                dd ?                                                                     ;
+   batfrclr                dd ?                                                                     ;
+   batclr                  dd ?                                                                     ;
+ends                                                                                                ;
+                                                                                                    ;
+struct WNDPRM                                                                                       ;
+   style                  dd ?                                                                      ;
+   header                 dd ?                                                                      ;
+   frame                  dd ?                                                                      ;
 ends                                                                                                ;
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
@@ -61,7 +72,7 @@ WINDOWSIZEY = 768                                                               
                                                                                                     ;
 configure:                                                                                          ;
    mov [IFCPs + INTERFACEPOS.framex],            1                    shl 16   + (WINDOWSIZEX - 2)  ;
-   mov [IFCPs + INTERFACEPOS.framey],            5                    shl 16   + 5                 ;
+   mov [IFCPs + INTERFACEPOS.framey],            5                    shl 16   + 5                  ;
    mov [IFCPs + INTERFACEPOS.campicpos],         140                  shl 16   + 50                 ;
    mov [IFCPs + INTERFACEPOS.campicsz],          644                  shl 16   + 480                ;
    mov [IFCPs + INTERFACEPOS.campictxpos],       (WINDOWSIZEX - 448)  shl 16   + 255                ;
@@ -88,50 +99,66 @@ configure:                                                                      
    mov [IFCLs + INTERFACECLR.sttsactive],        0x80FF9600                                         ;
    mov [IFCLs + INTERFACECLR.sttsdanger],        0x80FFA000                                         ;
    mov [IFCLs + INTERFACECLR.sttsdamage],        0x80FF3232                                         ;
+   mov [IFCLs + INTERFACECLR.accent],            0x00FF8615                                         ;
+   mov [IFCLs + INTERFACECLR.background],        0x000F0F0F                                         ;
+   mov [IFCLs + INTERFACECLR.batbgclr],          0x00555555                                         ;
+   mov [IFCLs + INTERFACECLR.batfrclr],          0x00C8C8C8                                         ;
+   mov [IFCLs + INTERFACECLR.batclr],            0x00FF8615                                         ;
+                                                                                                    ;
+   mov [WPs + WNDPRM.style],                     0x30000000                                         ;
+   mov [WPs + WNDPRM.header],                    0x01000000                                         ;
+   mov [WPs + WNDPRM.frame],                     0x00000000                                         ;
                                                                                                     ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         MAIN PROGRAM BLOCK                                        ;
 ;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
 redraw:                                                    ; Window redrawing                       ;
-@@:
+@@:                                                                                                 ;
    call draw_window                                        ; Calling draw_window proc               ;
                                                                                                     ;
 wait_event:                                                ; Waiting for an system event            ;
-   mov eax, 23                                             ; \ Calling SysFn10: Infinite waiting    ;
-   mov ebx, 4
+   mov eax, 23                                             ; \ Calling SysFn23: Timed waiting       ;
+   mov ebx, 4                                              ; | Time of waiting in .01 ms            ;
    mcall                                                   ; /                                      ;
-   cmp eax, 0                                              ; \ If SysEvent = 1, then                ;
-   je redraw
-   cmp eax, 1
+                                                                                                    ;
+   cmp eax, 0                                              ; \ If SysEvent = 0, then                ;
    je redraw                                               ; / redraw window                        ;
+                                                                                                    ;
+   cmp eax, 1                                              ; \ If SysEvent = 1, then                ;
+   je redraw                                               ; / redraw window                        ;
+                                                                                                    ;
    cmp eax, 2                                              ; \ If SysEvent = 2, then                ;
    je key                                                  ; / process pressed key                  ;
+                                                                                                    ;
    mcall -1                                                ; Else end process                       ;
+                                                                                                    ;
    jmp wait_event                                          ; Returning back                         ;
                                                                                                     ;
 key:                                                       ; Getting an ASCII number of pressed key ;
    mcall 2                                                 ; Calling SysFn02: Pressed key code      ;
    mov [keyid], ah                                         ; Move AH register value to keyid        ;
-   cmp [keyid], 45                                             ; Compare EBP value with 45 (-)          ;
-   je .cam_dec                                             ; If EBP = 45 then cam_dec, else continue;
-   cmp [keyid], 43                                             ; Compare EBP value with 43 (+)          ;
-   je .cam_inc                                             ; If EBP = 43 then cam_inc, else continue;
-   jmp @b
-
+   cmp [keyid], 45                                         ; Compare keyid with 45 (-)              ;
+   je .cam_dec                                             ; If = 45 then cam_dec, else continue    ;
+                                                                                                    ;
+   cmp [keyid], 43                                         ; Compare keyid with 43 (+)              ;
+   je .cam_inc                                             ; If = 43 then cam_inc, else continue    ;
+   jmp @b                                                  ; Else go redraw                         ;
+                                                                                                    ;
 .cam_dec:                                                  ; Switch camera num, backward            ;
-   mov bl, [numCamera]
-   dec bl
-   mov [numCamera], bl
-   push ebx
-   jmp @b
-
+   mov bl, [numCamera]                                                                              ;
+   dec bl                                                                                           ;
+   mov [numCamera], bl                                                                              ;
+   xor ebx, ebx                                                                                     ;
+   jmp @b                                                                                           ;
+                                                                                                    ;
 .cam_inc:                                                  ; Switch camera num, forward             ;
-   mov bl, [numCamera]                                     ; Move numCamera value to AL register
-   inc bl                                                  ; Increment value of DX register         ;
-   mov [numCamera], bl
-   push ebx                                    ; Move AH register value to numCamera    ;
-   jmp @b
-
+   mov bl, [numCamera]                                                                              ;
+   inc bl                                                                                           ;
+   mov [numCamera], bl                                                                              ;
+   xor ebx, ebx                                                                                     ;
+   jmp @b                                                                                           ;
+                                                                                                    ;
 random_byte:
 @getSeed:
    rdtsc
@@ -147,9 +174,12 @@ random_byte:
 
    jmp @f
 
-
+;---------------------------------------------------------------------------------------------------;
+;                                           WINDOW DRAWING                                          ;
+;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
 draw_window:                                               ; Drawing a window                       ;
-
+                                                                                                    ;
    mov eax, 12                                             ; \                                      ;
    mov ebx, 1                                              ; | Calling SysFn12: Window redraw, begin;
    mcall                                                   ; /                                      ;
@@ -157,9 +187,12 @@ draw_window:                                               ; Drawing a window   
    mov eax, 0                                              ; \ Calling SysFn00: Window definition   ;
    mov ebx, 0 shl 16 + (WINDOWSIZEX - 1)                   ; | X start position and width           ;
    mov ecx, 0 shl 16 + (WINDOWSIZEY - 1)                   ; | Y start position and height          ;
-   mov edx, wstyle                                         ; | Window style, 0xXYRRGGBB             ;
-   mov esi, wheader                                        ; | Header color, 0xXYRRGGBB             ;
-   mov edi, wframe                                         ; | Frame color, 0x00RRGGBB              ;
+   mov edx, [WPs + WNDPRM.style]                           ; | Window style, 0xXYRRGGBB             ;
+   xor edx, [IFCLs + INTERFACECLR.background]              ; } Interface bgnd color                 ;
+   mov esi, [WPs + WNDPRM.header]                          ; | Header color, 0xXYRRGGBB             ;
+   xor esi, [IFCLs + INTERFACECLR.accent]                  ; } Interface accent color               ;
+   mov edi, [WPs + WNDPRM.frame]                           ; | Frame color, 0x00RRGGBB              ;
+   xor edi, [IFCLs + INTERFACECLR.background]              ; } Interface bgnd color                 ;
    mcall                                                   ; /                                      ;
                                                                                                     ;
    mov eax, 71                                             ; \ Calling SysFn71: Window header       ;
@@ -168,15 +201,9 @@ draw_window:                                               ; Drawing a window   
    mov edx, 1                                              ; | Codepage                             ;
    mcall                                                   ; /                                      ;
                                                                                                     ;
-   ;mov eax, 4                                              ; \ Calling SysFn04: Text writing        ;
-   ;mov ebx, 30 shl 16 + 10                                 ; | X and Y start position               ;
-   ;mov ecx, tstyle                                         ; | Text style, 0xXXRRGGBB               ;
-   ;mov edx, string                                         ; | String begin address                 ;
-   ;mcall                                                   ; /                                      ;
-                                                                                                    ;
-                                                           ;----------------------------------------;
-                                                           ;           Graphics functions           ;
-                                                           ;----------------------------------------;
+;==========================================================;----------------------------------------;
+;==========================================================;           Graphics functions           ;
+;==========================================================;----------------------------------------;
                                                                                                     ;
 ;  mov eax, 13                                             ; \ Calling SysFn13: Rect drawing        ;
 ;  mov ebx, 5 shl 16 + 1012                                ; | X start position and width           ;
@@ -189,199 +216,212 @@ draw_window:                                               ; Drawing a window   
 ;  mov ecx, 5 shl 16 + 50                                  ; | Y start and end position             ;
 ;  mov edx, 0x00FFFFFF                                     ; | Line color, 0x00RRGGBB               ;
 ;  mcall                                                   ; /                                      ;
-
-   mov eax, 13
-   mov ebx, (WINDOWSIZEX - 57) shl 16 + 50
-   mov ecx, 3 shl 16 + 16
-   mov edx, 0x555555
-   mcall
-   mov ebx, (WINDOWSIZEX - 7) shl 16 + 4
-   mov ecx, 6 shl 16 + 10
-   mcall
-;-------------------------------------------------------------------------------
-
-   mov ebx, (WINDOWSIZEX - 56) shl 16 + 48
-   mov ecx, 4 shl 16 + 14
-   mov edx, 0xC8C8C8
-   mcall
-   mov ebx, (WINDOWSIZEX - 6) shl 16 + 2
-   mov ecx, 7 shl 16 + 8
-   mcall
-   mov ebx, (WINDOWSIZEX - 55) shl 16 + 46
-   mov ecx, 5 shl 16 + 12
-   mov edx, 0xFF8615
-   mcall
                                                                                                     ;
-                                                           ;----------------------------------------;
-                                                           ;            Antenna drawings            ;
-                                                           ;----------------------------------------;                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;            Battery drawing             ;
+;==========================================================;----------------------------------------;
+                                                                                                    ;
+battery:                                                                                            ;
+.frame:                                                                                             ;
+   mov eax, 13                                                                                      ;
+   mov ebx, (WINDOWSIZEX - 57) shl 16 + 50                                                          ;
+   mov ecx, 3 shl 16 + 16                                                                           ;
+   mov edx, 0x555555                                                                                ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 7) shl 16 + 4                                                            ;
+   mov ecx, 6 shl 16 + 10                                                                           ;
+   mcall                                                                                            ;
+                                                                                                    ;
+                                                                                                    ;
+.body:                                                                                              ;
+   mov ebx, (WINDOWSIZEX - 56) shl 16 + 48                                                          ;
+   mov ecx, 4 shl 16 + 14                                                                           ;
+   mov edx, 0xC8C8C8                                                                                ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 6) shl 16 + 2                                                            ;
+   mov ecx, 7 shl 16 + 8                                                                            ;
+   mcall                                                                                            ;
+                                                                                                    ;
+.charge:                                                                                            ;
+   mov ebx, (WINDOWSIZEX - 55) shl 16 + 46                                                          ;
+   mov bx, [batteryCharge]                                                                          ;
+   mov ecx, 5 shl 16 + 12                                                                           ;
+   mov edx, 0xFF8615                                                                                ;
+   mcall                                                                                            ;
+                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;            Antenna drawing             ;
+;==========================================================;----------------------------------------;
+                                                                                                    ;
 antenna_draw:                                              ; Antenna icon drawer function           ;
 .body:                                                     ; Drawing a body                         ;
-   mov eax, 38                                             ;                                        ;
-   mov ebx, (WINDOWSIZEX - 119)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
-   mov ecx, 3     shl 16 + 19                             ;                                        ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov eax, 38                                                                                      ;
+   mov ebx, (WINDOWSIZEX - 119) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mov ecx, 3                   shl 16 + 19                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
-   mov ecx, 3     shl 16 + 3                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 3                   shl 16 + 3                                                          ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
-   mov ecx, 3     shl 16 + 9                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mov ecx, 3                   shl 16 + 9                                                          ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov edx, [IFCLs + INTERFACECLR.sttsidle]                ;                                        ;
-   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
-   mov ecx, 19     shl 16 + 11                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov edx, [IFCLs + INTERFACECLR.sttsidle]                                                         ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
-   mov ecx, 19     shl 16 + 7                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 101)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
-   mov ecx, 19     shl 16 + 3                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 19                  shl 16 + 3                                                          ;
+   mcall                                                                                            ;
                                                                                                     ;
-   cmp [signalLevel], 0                                    ;                                        ;
-   je  .nosignal                                           ;                                        ;
-   cmp [signalLevel], 170                                  ;                                        ;
-   ja  .good                                               ;                                        ;
-   cmp [signalLevel], 85                                   ;                                        ;
-   ja  .normal                                             ;                                        ;
-   jmp .bad                                                ;                                        ;
+   cmp [signalLevel], 0                                                                             ;
+   je  .nosignal                                                                                    ;
+   cmp [signalLevel], 170                                                                           ;
+   ja  .good                                                                                        ;
+   cmp [signalLevel], 85                                                                            ;
+   ja  .normal                                                                                      ;
+   jmp .bad                                                                                         ;
                                                                                                     ;
 .bad:                                                      ; Drawing if bad signal                  ;
-   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
-   mov ecx, 19     shl 16 + 11                             ;                                        ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
-   mcall                                                   ;                                        ;
-   jmp @f                                                  ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
                                                                                                     ;
 .normal:                                                   ; If signal is normal                    ;
-   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
-   mov ecx, 19     shl 16 + 7                             ;                                        ;
-   mov edx, [IFCLs + INTERFACECLR.antennamid]              ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mov edx, [IFCLs + INTERFACECLR.antennamid]                                                       ;
    mcall                                                                                            ;
-                                                           ;                                        ;
-   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
-   mov ecx, 19     shl 16 + 11                             ;                                        ;
-   mcall                                                   ;                                        ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
    jmp @f                                                                                           ;
                                                                                                     ;
 .good:                                                     ; If signal is good                      ;
-   mov ebx, (WINDOWSIZEX - 101)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
-   mov ecx, 19     shl 16 + 3   ;                         ;                                        ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 19                  shl 16 + 3   ;                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
-   mov ecx, 19     shl 16 + 7                             ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
-   mov ecx, 19     shl 16 + 11                             ;                                        ;
-   mcall                                                   ;                                        ;
-   jmp @f                                                  ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
                                                                                                     ;
 .nosignal:                                                 ; If no signal                           ;
-   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
-   mov ecx, 3     shl 16 + 19                             ;                                        ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
-   mcall                                                   ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 3                   shl 16 + 19                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
                                                                                                     ;
-   mov ecx, 19     shl 16 + 3                             ;                                        ;
-   mcall                                                   ;                                        ;
-   jmp @f                                                  ;                                        ;
-
-
+   mov ecx, 19                  shl 16 + 3                                                          ;
+   mcall                                                                                            ;
+   jmp @f                                                                                           ;
                                                                                                     ;
 @@:                                                                                                 ;
-                                                           ;----------------------------------------;
-                                                           ;             Frame drawings             ;
-                                                           ;----------------------------------------;
-   mov eax, 4
-   mov ebx, (WINDOWSIZEX - 98) shl 16 + 3
-   mov ecx, 0x80FF8615
-   mov edx, prot_dp40
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 98) shl 16 + 12
-   mov edx, pingInfinity
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 72) shl 16 + 12
-   mov edx, ping_meas
-   mcall
-
-   mov eax, 38                                                        ; Updated and optimized frame drawer
-   mov ebx, 1 shl 16 + (WINDOWSIZEX - 2)                  ; See the syntax on line 90
-   mov ecx, 1 shl 16 + 1                  ;
-   mov edx, [IFCLs + INTERFACECLR.frameclr]                ;
-   mcall                                                   ;
-
-   mov ecx, (WINDOWSIZEY - 24) shl 16 + (WINDOWSIZEY - 24)   ;
-   mcall
-
-   mov ecx, 21 shl 16 + 21                                ;
-   mcall
-                                ;
-   mov ebx, (WINDOWSIZEX - 2) shl 16 + (WINDOWSIZEX - 2) ;
-   mov ecx, 1 shl 16 + (WINDOWSIZEY - 24)     ;
-   mcall                        ;
-
-
-                                ;
-   mov ebx, 1 shl 16 + 1       ;
-   mcall                        ;
-                                ;    ;
-   mov ecx, 763 shl 16 + 763   ;
-   mcall
-   ;
-   mov ebx, (WINDOWSIZEX - 35) shl 16 + (WINDOWSIZEX - 35)
-   mov ecx, 22 shl 16 + (WINDOWSIZEY - 25)
-   mcall
-
-   mov ebx, 2 shl 16 + (WINDOWSIZEX - 36)
-   mov ecx, (WINDOWSIZEY - 76) shl 16 + (WINDOWSIZEY - 76)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)
-   mov ecx, 510 shl 16 + (WINDOWSIZEY - 80)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 508) shl 16 + (WINDOWSIZEX - 508)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 503) shl 16 + (WINDOWSIZEX - 503)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 39) shl 16 + (WINDOWSIZEX - 39)
-   mcall
-
-   mov ecx, 510 shl 16 + 510
-   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)
-   mcall
-
-   mov ecx, (WINDOWSIZEY - 80) shl 16 + (WINDOWSIZEY - 80)
-   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)
-   mcall
-
-   ;
-   ;----------------------------;
-   ;   Camera pic placeholder   ; Drawing a placeholder with size 644x480
-   ;----------------------------;
-   ;
+;==========================================================;----------------------------------------;
+;==========================================================;             Frame drawing              ;
+;==========================================================;----------------------------------------;
+                                                                                                    ;
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;
+                                                                                                    ;
+   mov eax, 4                                                                                       ;
+   mov ebx, (WINDOWSIZEX - 98)  shl 16 + 3                                                          ;
+   mov ecx, [IFCLs + INTERFACECLR.accent]                                                           ;
+   mov edx, prot_dp40                                                                               ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 98)  shl 16 + 12                                                         ;
+   mov edx, pingInfinity                                                                            ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 72)  shl 16 + 12                                                         ;
+   mov edx, ping_meas                                                                               ;
+   mcall                                                                                            ;
+                                                                                                    ;
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;
+                                                           ; !!! UPDATED FRAME DRAWER               ;
+                                                           ; SEE THE SYNTAX IN "Graphics functions" ;
+   mov eax, 38                                                                                      ;
+   mov ebx, 1                   shl 16 + (WINDOWSIZEX - 2)                                          ;
+   mov ecx, 1                   shl 16 + 1                                                          ;
+   mov edx, [IFCLs + INTERFACECLR.frameclr]                                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, (WINDOWSIZEY - 24)  shl 16 + (WINDOWSIZEY - 24)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 21                  shl 16 + 21                                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 2)   shl 16 + (WINDOWSIZEX - 2)                                          ;
+   mov ecx, 1                   shl 16 + (WINDOWSIZEY - 24)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 1                   shl 16 + 1                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 763                 shl 16 + 763                                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 35)  shl 16 + (WINDOWSIZEX - 35)                                         ;
+   mov ecx, 22                  shl 16 + (WINDOWSIZEY - 25)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 2                   shl 16 + (WINDOWSIZEX - 36)                                         ;
+   mov ecx, (WINDOWSIZEY - 76)  shl 16 + (WINDOWSIZEY - 76)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)                                        ;
+   mov ecx, 510                 shl 16 + (WINDOWSIZEY - 80)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 508) shl 16 + (WINDOWSIZEX - 508)                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 503) shl 16 + (WINDOWSIZEX - 503)                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 39)  shl 16 + (WINDOWSIZEX - 39)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 510                 shl 16 + 510                                                        ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, (WINDOWSIZEY - 80)  shl 16 + (WINDOWSIZEY - 80)                                         ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;    Camera pic plceholder (644x480)     ;
+;==========================================================;----------------------------------------;
 
 ;   mov ecx, 530
 ;@newLine:
@@ -413,79 +453,73 @@ antenna_draw:                                              ; Antenna icon drawer
 ;   dec ecx
 ;   cmp ecx, 50
 ;   jne @newLine
-
-
-                                ;
-   ;----------------------------;
-   ;        Other frames        ;
-   ;----------------------------;
-                                ;
-   mov eax, 4                   ; \ Calling SysFn04: Text writing
-   mov ebx, 370 * 65535 + 275   ; | X start position and Y start position
-   mov ecx, 0xC2FFFFFF          ; | Text style, 0xXXRRGGBB
-   mov edx, signal              ; | String begin address
-   mov edi, 0x00000000          ; | Font background color, 0x00RRGGBB
-   mcall                        ; /
-                                ;
-   mov eax, 38                  ; Updated and optimized frame drawing
-   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 39)   ;
-   mov ecx, 26 shl 16 + 26     ;
-   mov edx, 0x00FF8615          ;
-   mcall                        ;
-                             ;
-   mov ecx, 506 shl 16 + 506   ;
-   mcall                        ;
-                                ;
-   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)   ;
-   mov ecx, 26 shl 16 + 506    ;
-   mcall                        ;
-                                ;
-   mov ebx, (WINDOWSIZEX - 39) shl 16 + (WINDOWSIZEX - 39)   ;
-   mcall                        ;
-
-
-                                ;
-   ;----------------------------;
-   ;        Text drawing        ;
-   ;----------------------------;
-                                ;
-   mov eax, 4                   ; \ Calling SysFn04: Text writing
-   mov ebx, (WINDOWSIZEX - 174) shl 16 + 479   ; | X start position and Y start position
-   mov ecx, 0xC2FF8615          ; | Text style, 0xXXRRGGBB
-   mov edx, cam                 ; | String begin address
-   mov edi, 0x00323232          ; | Font background color, 0x00RRGGBB
-   mcall                        ; /
-
-   mov ebx, [IFCPs + INTERFACEPOS.campictxpos]
-   mov edx, signal
-   mcall
-                                ;
-   mov ebx, (WINDOWSIZEX - 57) shl 16 + 479   ; Move to EBX register XY coordinate
-   mov edx, numCamera           ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 3 shl 16 + (WINDOWSIZEY - 72)      ; Move to EBX register XY coordinate
-   mov ecx, ts_idle             ; Move to ECX register a color value
-   mov edx, prevStatus2         ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 3 shl 16 + (WINDOWSIZEY - 62)     ; Move to EBX register XY coordinate
-   mov edx, prevStatus1         ;
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 3 shl 16 + (WINDOWSIZEY - 52)     ; Move to EBX register XY coordinate
-   mov ecx, ts_danger           ; Move to ECX register a color value
-   mov edx, currStatus          ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 3 shl 16 + (WINDOWSIZEY - 36)     ; Move to EBX register XY coordinate
-   mov ecx, ts_active           ; Move to ECX register a color value
-   mov edx, terminalIn          ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-
-   mov ebx, (WINDOWSIZEX - 68) shl 16 + (WINDOWSIZEY - 72)
-   mov edx, terminalHeader
-   mcall
+                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;             Other frames               ;
+;==========================================================;----------------------------------------;
+                                                                                                    ;
+   mov eax, 38                                             ; Updated and optimized frame drawing    ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 39)                                         ;
+   mov ecx, 26                  shl 16 + 26                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.accent]                                                           ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 506                 shl 16 + 506                                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)                                        ;
+   mov ecx, 26                  shl 16 + 506                                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 39)  shl 16 + (WINDOWSIZEX - 39)                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;             Text drawing               ;
+;==========================================================;----------------------------------------;
+                                                                                                    ;
+   mov eax, 4                                              ; \ Calling SysFn04: Text writing        ;
+   mov ebx, (WINDOWSIZEX - 174) shl 16 + 479               ; | X start position and Y start position;
+   mov ecx, 0xC2000000                                     ; | Text style, 0xXXRRGGBB               ;
+   xor ecx, [IFCLs + INTERFACECLR.accent]                  ; } Theme accent color                   ;
+   mov edx, cam                                            ; | String begin address                 ;
+   mov edi, [IFCLs + INTERFACECLR.background]              ; } Theme background color, 0x00RRGGBB   ;
+   mcall                                                   ; /                                      ;
+                                                                                                    ;
+   mov ebx, [IFCPs + INTERFACEPOS.campictxpos]                                                      ;
+   mov edx, signal                                                                                  ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 57)  shl 16 + 479               ; Move to EBX register XY coordinate     ;
+   mov edx, numCamera                                      ; Move to EDX register string address    ;
+   mcall                                                   ; Call SysFn04                           ;
+                                                                                                    ;
+   mov ebx, 3                   shl 16 + (WINDOWSIZEY - 72)                                         ;
+   mov ecx, ts_idle                                                                                 ;
+   mov edx, prevStatus2                                                                             ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 3                   shl 16 + (WINDOWSIZEY - 62)                                         ;
+   mov edx, prevStatus1                                                                             ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 3                   shl 16 + (WINDOWSIZEY - 52)                                         ;
+   mov ecx, ts_danger                                                                               ;
+   mov edx, currStatus                                                                              ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, 3                   shl 16 + (WINDOWSIZEY - 36)                                         ;
+   mov ecx, ts_active                                                                               ;
+   mov edx, terminalIn                                                                              ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 68)  shl 16 + (WINDOWSIZEY - 72)                                         ;
+   mov edx, terminalHeader                                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+;==========================================================;----------------------------------------;
+;==========================================================;             Text drawing               ;
+;==========================================================;----------------------------------------;
 
    mov eax, 38
    mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
@@ -846,7 +880,7 @@ com_debug:                      ; COM port feedback
    mov eax, 4                   ; \ Calling SysFn04: Text writing
    mov ebx, 30 * 65536 + 30     ; | X start position and Y start position
    mov ecx, tstyle              ; | Text style, 0xXXRRGGBB
-   mov edx, string              ; | String begin address
+;   mov edx, string              ; | String begin address
    mcall                        ; /
                                 ;
 com_send:                       ; COM port using
@@ -870,11 +904,11 @@ DATA                            ; PROGRAM DATA BLOCK
    ;----------------------------;
                                 ;
    IFCPs             rd   15
-   IFCLs             rd   19
+   IFCLs             rd   24
+   WPs               rd   3
 
    numCamera         db   49, 0
    header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
-   string            db   'Sample string', 0
    signal            db   'NO SIGNAL!', 0
    aboutCOM          db   'RC on COM ', 0
    aboutDrone        db   'Connected: ', 0
@@ -922,6 +956,7 @@ DATA                            ; PROGRAM DATA BLOCK
    signalLevel       db   0
    pingValue         db   0
    generatorSeed     dd   0
+   batteryCharge     dw   46
 
                                 ;
    ;----------------------------;
@@ -929,9 +964,6 @@ DATA                            ; PROGRAM DATA BLOCK
    ;----------------------------;
    ; name            | value    ;
                                 ;
-   wstyle            =     0x30000000
-   wheader           =     0x01000000
-   wframe            =     0x00323232
    tstyle            =     0x80000000
    ts_active         =     0x8000FF16
    ts_idle           =     0x80646464
