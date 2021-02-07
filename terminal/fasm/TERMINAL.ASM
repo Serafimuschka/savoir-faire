@@ -7,7 +7,7 @@
 ;                                  Dec 2020 - Feb 2021 (c) toqsycc                                  ;
 ;---------------------------------------------------------------------------------------------------;
 include "kolibrios/macros.inc"                                                 ; ADDITIVE LIBRARIES ;
-;include "kolibrios/proc32.inc"                                                                     ;
+include "kolibrios/proc32.inc"                                                                      ;
                                                                                                     ;
 MEOS_APP_START                                                               ; PROGRAM BEGINS HERE  ;
                                                                                                     ;
@@ -68,50 +68,49 @@ struct WNDPRM                                                                   
    frame                  dd ?                                                                      ;
    txtcolor               dd ?                                                                      ;
 ends                                                                                                ;
-
-struct FLAG
-   width                  dd ?
-   height                 dd ?
-   size                   dd ?
-   warnpos                dd ?
-   warnclr                dd ?
-   stat_na                dd ?
-   stat_off               dd ?
-   stat_on                dd ?
-   stat_act               dd ?
-   stat_idle              dd ?
-   stat_dang              dd ?
-   stat_nr                dd ?
-ends
-
-struct EFLAG
-   fg_work                dd ?
-   fg_rf                  dd ?
-   fg_bat                 dd ?
-   fg_prot                dd ?
-   fg_fdbk                dd ?
-   fg_com                 dd ?
-   fg_spdt                dd ?
-   fg_tire                dd ?
-   fg_aer                 dd ?
-   fg_eng                 dd ?
-   fg_dmgd                dd ?
-   fg_stat                dd ?
-   fg_ctrl                dd ?
-   fg_mnpl                dd ?
-   fg_vid                 dd ?
-   fg_rcom                dd ?
-   fg_scty                dd ?
-   fg_mvmt                dd ?
-   fg_idl                 dd ?
-   fg_lig                 dd ?
-   fg_lasr                dd ?
-   fg_warn                dd ?
-   fg_snd                 dd ?
-   fg_jmr                 dd ?
-   fg_spec                dd ?
-ends
-
+                                                                                                    ;
+struct FLAG                                                                                         ;
+   width                  dd ?                                                                      ;
+   height                 dd ?                                                                      ;
+   size                   dd ?                                                                      ;
+   warnpos                dd ?                                                                      ;
+   warnclr                dd ?                                                                      ;
+   stat_na                dd ?                                                                      ;
+   stat_off               dd ?                                                                      ;
+   stat_on                dd ?                                                                      ;
+   stat_act               dd ?                                                                      ;
+   stat_idle              dd ?                                                                      ;
+   stat_dang              dd ?                                                                      ;
+   stat_nr                dd ?                                                                      ;
+ends                                                                                                ;
+                                                                                                    ;
+struct EFLAG                                                                                        ;
+   fg_work                dd ?                                                                      ;
+   fg_rf                  dd ?                                                                      ;
+   fg_bat                 dd ?                                                                      ;
+   fg_prot                dd ?                                                                      ;
+   fg_fdbk                dd ?                                                                      ;
+   fg_com                 dd ?                                                                      ;
+   fg_spdt                dd ?                                                                      ;
+   fg_tire                dd ?                                                                      ;
+   fg_aer                 dd ?                                                                      ;
+   fg_eng                 dd ?                                                                      ;
+   fg_dmgd                dd ?                                                                      ;
+   fg_stat                dd ?                                                                      ;
+   fg_ctrl                dd ?                                                                      ;
+   fg_mnpl                dd ?                                                                      ;
+   fg_vid                 dd ?                                                                      ;
+   fg_rcom                dd ?                                                                      ;
+   fg_scty                dd ?                                                                      ;
+   fg_mvmt                dd ?                                                                      ;
+   fg_idl                 dd ?                                                                      ;
+   fg_lig                 dd ?                                                                      ;
+   fg_lasr                dd ?                                                                      ;
+   fg_warn                dd ?                                                                      ;
+   fg_snd                 dd ?                                                                      ;
+   fg_jmr                 dd ?                                                                      ;
+   fg_spec                dd ?                                                                      ;
+ends                                                                                                ;
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
 WINDOWSIZEY = 768                                                                                   ;
@@ -155,6 +154,19 @@ configure:                                                                      
    mov [WPs + WNDPRM.header],                    0x01000000                                         ;
    mov [WPs + WNDPRM.frame],                     0x00000000                                         ;
    mov [WPs + WNDPRM.txtcolor],                  0x80000000                                         ;
+                                                                                                    ;
+   mov [FGs + FLAG.width],                       0x0000004B                                         ;
+   mov [FGs + FLAG.height],                      0x00000011                                         ;
+   mov [FGs + FLAG.size],                        0x0000004B           shl 16 + 0x00000011           ;
+   mov [FGs + FLAG.warnpos],                     0x00000002           shl 16 + 0x00000005           ;
+   mov [FGs + FLAG.warnclr],                     0x00FF0000                                         ;
+   mov [FGs + FLAG.stat_na],                     0x00969696                                         ;
+   mov [FGs + FLAG.stat_off],                    0x00323232                                         ;
+   mov [FGs + FLAG.stat_on],                     0x0016FF16                                         ;
+   mov [FGs + FLAG.stat_act],                    0x00FF8615                                         ;
+   mov [FGs + FLAG.stat_idle],                   0x001616FF                                         ;
+   mov [FGs + FLAG.stat_dang],                   0x00FF1616                                         ;
+   mov [FGs + FLAG.stat_nr],                     0x00FF00FF                                         ;
                                                                                                     ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         MAIN PROGRAM BLOCK                                        ;
@@ -265,42 +277,32 @@ draw_window:                                               ; Drawing a window   
 ;  mcall                                                   ; /                                      ;
                                                                                                     ;
 ;==========================================================;----------------------------------------;
-;==========================================================;            Battery drawing             ;
+;==========================================================;             Topbar drawing             ;
 ;==========================================================;----------------------------------------;
                                                                                                     ;
-
-                                                                                                    ;
-;==========================================================;----------------------------------------;
-;==========================================================;            Antenna drawing             ;
-;==========================================================;----------------------------------------;
-                                                                                                    ;
-   jmp DrawAntenna                                                                                 ;
-@ant_ok:
-   jmp DrawBattery
-@bat_ok:
-                                                                                                    ;                                                                                                 ;
-;==========================================================;----------------------------------------;
-;==========================================================;             Frame drawing              ;
-;==========================================================;----------------------------------------;
-                                                                                                    ;
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;
+   jmp DrawAntenna                                                                                  ;
+@ant_ok:                                                                                            ;
+   jmp DrawBattery                                                                                  ;
+@bat_ok:                                                                                            ;
                                                                                                     ;
    mov eax, 4                                                                                       ;
    mov ebx, (WINDOWSIZEX - 98)  shl 16 + 3                                                          ;
    mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
    xor ecx, [IFCLs + INTERFACECLR.accent]                                                           ;
-   mov edx, prot_dp40                                                                               ;
+   mov edx, protocol                                                                                ;
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, (WINDOWSIZEX - 98)  shl 16 + 12                                                         ;
-   mov edx, pingInfinity                                                                            ;
+   mov edx, ping_inf                                                                                ;
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, (WINDOWSIZEX - 72)  shl 16 + 12                                                         ;
    mov edx, ping_meas                                                                               ;
    mcall                                                                                            ;
                                                                                                     ;
-;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;
+;==========================================================;----------------------------------------;
+;==========================================================;             Frame drawing              ;
+;==========================================================;----------------------------------------;
                                                            ; !!! UPDATED FRAME DRAWER               ;
                                                            ; SEE THE SYNTAX IN "Graphics functions" ;
    mov eax, 38                                                                                      ;
@@ -465,351 +467,41 @@ draw_window:                                               ; Drawing a window   
 ;==========================================================;             Text drawing               ;
 ;==========================================================;----------------------------------------;
 
-   mov eax, 38
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mov ecx, 512 shl 16 + 512
-   mov edx, [IFCLs + INTERFACECLR.frameclr]
-   mcall
+   mov edx, [FGs + FLAG.stat_on]
+   mov ebp, [FGs + FLAG.size]
+   mov edi, (WINDOWSIZEX - 501) shl 16 + 512
+   mov esi, @fgwork
 
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
+   jmp DrawFlag
+@fgwork:
 
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
+   mov edx, [FGs + FLAG.stat_on]
+   mov edi, (WINDOWSIZEX - 425) shl 16 + 512
+   mov esi, @fgrf
 
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
+   jmp DrawFlag
+@fgrf:
 
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
+   mov edx, [FGs + FLAG.stat_off]
+   mov edi, (WINDOWSIZEX - 349) shl 16 + 512
+   mov esi, @fgbat
 
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
+   jmp DrawFlag
+@fgbat:
 
-   mov ecx, 529 shl 16 + 529
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
+   mov edx, [FGs + FLAG.stat_idle]
+   mov edi, (WINDOWSIZEX - 501) shl 16 + 530
+   mov esi, @fgprot
 
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
+   jmp DrawFlag
+@fgprot:
 
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
+   mov edx, [FGs + FLAG.stat_dang]
+   mov edi, (WINDOWSIZEX - 425) shl 16 + 530
+   mov esi, @fgfdbk
 
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 531 shl 16 + 531
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 548 shl 16 + 548
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 550 shl 16 + 550
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 567 shl 16 + 567
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 569 shl 16 + 569
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 586 shl 16 + 586
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 588 shl 16 + 588
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 605 shl 16 + 605
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 607 shl 16 + 607
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 624 shl 16 + 624
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 626 shl 16 + 626
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 643 shl 16 + 643
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 645 shl 16 + 645
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 662 shl 16 + 662
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 664 shl 16 + 664
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-   mov ecx, 681 shl 16 + 681
-   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
-   mcall
-
-   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
-   mcall
-
-                                ;
+   jmp DrawFlag
+@fgfdbk:
 
    mov eax, 12                  ; \ Calling SysFn12: Window redraw, end
    mov ebx, 2                   ; /
@@ -934,25 +626,69 @@ DrawBattery:                                                                    
    mcall                                                                                            ;
    xor bx, bx                                                                                       ;
    jmp @bat_ok                                                                                      ;
-                                                                                                    ;
+
+; DrawFlag drawings a flag icon with pre-defined params:
+; - EDX contains EFLAG. flag status pointer
+; - EBP contains SIZE OF flag button. See FLAG.size struct
+; - EDI contains START POINT OF button
+; - ESP contains ANONIMOUS ESCAPE ADDRESS of procedure
+DrawFlag:
+   mov eax, 13
+   mov [bufferW2], edx
+
+   mov ebx, edi
+   mov [bufferW], ebp
+   shr ebp, 16
+   mov bx, bp
+   mov ebp, [bufferW]
+
+   mov [bufferW], edi
+   shl edi, 16
+   mov ecx, edi
+   mov cx, bp
+
+   mcall
+
+   add ebx, 1 shl 16
+   add ecx, 1 shl 16
+   sub bx, 2
+   sub cx, 2
+   mov edx, [IFCLs + INTERFACECLR.background]
+   mcall
+
+   mov eax, 4
+   mov ebx, [bufferW]
+   add ebx, [FGs + FLAG.warnpos]
+   mov ecx, [WPs + WNDPRM.txtcolor]
+   xor ecx, [FGs + FLAG.warnclr]
+   mov edx, fg_warn
+   mcall
+
+   add ebx, 10 shl 16
+   mov ecx, [WPs + WNDPRM.txtcolor]
+   xor ecx, [bufferW2]
+   mov edx, fg_work
+   mcall
+
+   jmp esi                                                                                          ;
                                                            ;----------------------------------------;
                                                            ;          ADDITIONAL FUNCTIONS          ;
                                                            ;----------------------------------------;
                                 ;
-com_debug:                      ; COM port feedback
-   mov eax, 4                   ; \ Calling SysFn04: Text writing
-   mov ebx, 30 * 65536 + 30     ; | X start position and Y start position
-   mov ecx, tstyle              ; | Text style, 0xXXRRGGBB
+;com_debug:                      ; COM port feedback
+;   mov eax, 4                   ; \ Calling SysFn04: Text writing
+;   mov ebx, 30 * 65536 + 30     ; | X start position and Y start position
+;   mov ecx, tstyle              ; | Text style, 0xXXRRGGBB
 ;   mov edx, string              ; | String begin address
-   mcall                        ; /
+;   mcall                        ; /
                                 ;
-com_send:                       ; COM port using
-   mov eax, 43                  ; \ Calling SysFn43: I/O ports
-   mov ebx, 0x0F                ; | Move to EBX register a data to send
-   mov ecx, 0x4                 ; | Move to ECX register a port to use
-   mcall                        ; /
-   xor eax, 0                   ; Comparing EAX register value with 0
-   js com_debug                 ; If EAX = 0 then jump to com_debug
+;com_send:                       ; COM port using
+;   mov eax, 43                  ; \ Calling SysFn43: I/O ports
+;   mov ebx, 0x0F                ; | Move to EBX register a data to send
+;   mov ecx, 0x4                 ; | Move to ECX register a port to use
+;   mcall                        ; /
+;   xor eax, 0                   ; Comparing EAX register value with 0
+;   js com_debug                 ; If EAX = 0 then jump to com_debug
                                 ;
 DATA                            ; PROGRAM DATA BLOCK
    keyid db 0                  ; Reserved for pressed key ID's (1 byte)
@@ -1015,13 +751,19 @@ DATA                            ; PROGRAM DATA BLOCK
    trans_fast        db   'Fast', 0
    ping              db   'CONNECTION PING: ', 0
    ping_meas         db   'ms', 0
-   pingInfinity      db   'inf', 0
-   prot_dp40         db   'DP-40', 0
+   ping_inf          db   'inf', 0
+   protocol          db   'DP-40', 0
+
+   fg_warn           db   '!', 0
+   fg_work           db   'WORK', 0
 
    signalLevel       db   0
    pingValue         db   0
    generatorSeed     dd   0
    batteryCharge     dw   40
+   bufferS           dw   0
+   bufferW           dd   0
+   bufferW2          dd   0
 
                                 ;
    ;----------------------------;
