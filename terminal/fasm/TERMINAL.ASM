@@ -7,6 +7,7 @@
 ;                                  Dec 2020 - Feb 2021 (c) toqsycc                                  ;
 ;---------------------------------------------------------------------------------------------------;
 include "kolibrios/macros.inc"                                                 ; ADDITIVE LIBRARIES ;
+;include "kolibrios/proc32.inc"                                                                     ;
                                                                                                     ;
 MEOS_APP_START                                                               ; PROGRAM BEGINS HERE  ;
                                                                                                     ;
@@ -91,17 +92,17 @@ configure:                                                                      
    mov [IFCLs + INTERFACECLR.campic5],           0x00FF00FF                                         ;
    mov [IFCLs + INTERFACECLR.campic6],           0x00FF0000                                         ;
    mov [IFCLs + INTERFACECLR.campic7],           0x000000FF                                         ;
-   mov [IFCLs + INTERFACECLR.cmdhistory],        0x80646464                                         ;
-   mov [IFCLs + INTERFACECLR.cmdlatest],         0x80FF9600                                         ;
-   mov [IFCLs + INTERFACECLR.cmdcurrent],        0x8000FF00                                         ;
+   mov [IFCLs + INTERFACECLR.cmdhistory],        0x00646464                                         ;
+   mov [IFCLs + INTERFACECLR.cmdlatest],         0x00FF9600                                         ;
+   mov [IFCLs + INTERFACECLR.cmdcurrent],        0x0000FF00                                         ;
    mov [IFCLs + INTERFACECLR.antennabad],        0x00FF0000                                         ;
    mov [IFCLs + INTERFACECLR.antennamid],        0x00FFFF00                                         ;
    mov [IFCLs + INTERFACECLR.antennagood],       0x0000FF00                                         ;
    mov [IFCLs + INTERFACECLR.catgclr],           0x80FFFFFF                                         ;
-   mov [IFCLs + INTERFACECLR.sttsidle],          0x80646464                                         ;
-   mov [IFCLs + INTERFACECLR.sttsactive],        0x80FF9600                                         ;
-   mov [IFCLs + INTERFACECLR.sttsdanger],        0x80FFA000                                         ;
-   mov [IFCLs + INTERFACECLR.sttsdamage],        0x80FF3232                                         ;
+   mov [IFCLs + INTERFACECLR.sttsidle],          0x00646464                                         ;
+   mov [IFCLs + INTERFACECLR.sttsactive],        0x00FF9600                                         ;
+   mov [IFCLs + INTERFACECLR.sttsdanger],        0x00FFA000                                         ;
+   mov [IFCLs + INTERFACECLR.sttsdamage],        0x00FF3232                                         ;
    mov [IFCLs + INTERFACECLR.batbgclr],          0x00555555                                         ;
    mov [IFCLs + INTERFACECLR.batfrclr],          0x00C8C8C8                                         ;
    mov [IFCLs + INTERFACECLR.batclr],            0x00FF8615                                         ;
@@ -161,20 +162,20 @@ key:                                                       ; Getting an ASCII nu
    xor ebx, ebx                                                                                     ;
    jmp @b                                                                                           ;
                                                                                                     ;
-random_byte:
-@getSeed:
-   rdtsc
-   mov [generatorSeed], eax
-   mov edx, 0
-
-   cmp [generatorSeed], 0
-   je @getSeed
-
-   mov ebx, 255
-   div ebx
-   mov [generatorSeed], edx
-
-   jmp @f
+;random_byte:
+;@getSeed:
+;   rdtsc
+;   mov [generatorSeed], eax
+;   mov edx, 0
+;
+;   cmp [generatorSeed], 0
+;   je @getSeed
+;
+;   mov ebx, 255
+;   div ebx
+;   mov [generatorSeed], edx
+;
+;   jmp @f
 
 ;---------------------------------------------------------------------------------------------------;
 ;                                           WINDOW DRAWING                                          ;
@@ -223,124 +224,17 @@ draw_window:                                               ; Drawing a window   
 ;==========================================================;            Battery drawing             ;
 ;==========================================================;----------------------------------------;
                                                                                                     ;
-battery:                                                                                            ;
-.frame:                                                                                             ;
-   mov eax, 13                                                                                      ;
-   mov ebx, (WINDOWSIZEX - 57) shl 16 + 50                                                          ;
-   mov ecx, 3 shl 16 + 16                                                                           ;
-   mov edx, [IFCLs + INTERFACECLR.batbgclr]                                                         ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 7) shl 16 + 4                                                            ;
-   mov ecx, 6 shl 16 + 10                                                                           ;
-   mcall                                                                                            ;
-                                                                                                    ;
-                                                                                                    ;
-.body:                                                                                              ;
-   mov ebx, (WINDOWSIZEX - 56) shl 16 + 48                                                          ;
-   mov ecx, 4 shl 16 + 14                                                                           ;
-   mov edx, [IFCLs + INTERFACECLR.batfrclr]                                                         ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 6) shl 16 + 2                                                            ;
-   mov ecx, 7 shl 16 + 8                                                                            ;
-   mcall                                                                                            ;
-                                                                                                    ;
-.charge:                                                                                            ;
-   mov ebx, (WINDOWSIZEX - 55) shl 16 + 46                                                          ;
-   mov bx, [batteryCharge]                                                                          ;
-   mov ecx, 5 shl 16 + 12                                                                           ;
-   mov edx, [IFCLs + INTERFACECLR.batclr]                                                           ;
-   mcall                                                                                            ;
+
                                                                                                     ;
 ;==========================================================;----------------------------------------;
 ;==========================================================;            Antenna drawing             ;
 ;==========================================================;----------------------------------------;
                                                                                                     ;
-antenna_draw:                                              ; Antenna icon drawer function           ;
-.body:                                                     ; Drawing a body                         ;
-   mov eax, 38                                                                                      ;
-   mov ebx, (WINDOWSIZEX - 119) shl 16 + (WINDOWSIZEX - 119)                                        ;
-   mov ecx, 3                   shl 16 + 19                                                         ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 113)                                        ;
-   mov ecx, 3                   shl 16 + 3                                                          ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 119)                                        ;
-   mov ecx, 3                   shl 16 + 9                                                          ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 119)                                        ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov edx, [IFCLs + INTERFACECLR.sttsidle]                                                         ;
-   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
-   mov ecx, 19                  shl 16 + 11                                                         ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
-   mov ecx, 19                  shl 16 + 7                                                          ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
-   mov ecx, 19                  shl 16 + 3                                                          ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   cmp [signalLevel], 0                                                                             ;
-   je  .nosignal                                                                                    ;
-   cmp [signalLevel], 170                                                                           ;
-   ja  .good                                                                                        ;
-   cmp [signalLevel], 85                                                                            ;
-   ja  .normal                                                                                      ;
-   jmp .bad                                                                                         ;
-                                                                                                    ;
-.bad:                                                      ; Drawing if bad signal                  ;
-   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
-   mov ecx, 19                  shl 16 + 11                                                         ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
-                                                                                                    ;
-.normal:                                                   ; If signal is normal                    ;
-   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
-   mov ecx, 19                  shl 16 + 7                                                          ;
-   mov edx, [IFCLs + INTERFACECLR.antennamid]                                                       ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
-   mov ecx, 19                  shl 16 + 11                                                         ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
-                                                                                                    ;
-.good:                                                     ; If signal is good                      ;
-   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
-   mov ecx, 19                  shl 16 + 3   ;                                                      ;
-   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
-   mov ecx, 19                  shl 16 + 7                                                          ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
-   mov ecx, 19                  shl 16 + 11                                                         ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
-                                                                                                    ;
-.nosignal:                                                 ; If no signal                           ;
-   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 101)                                        ;
-   mov ecx, 3                   shl 16 + 19                                                         ;
-   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
-   mcall                                                                                            ;
-                                                                                                    ;
-   mov ecx, 19                  shl 16 + 3                                                          ;
-   mcall                                                                                            ;
-   jmp @f                                                                                           ;
-                                                                                                    ;
-@@:                                                                                                 ;
+   jmp DrawAntenna                                                                                 ;
+@ant_ok:
+   jmp DrawBattery
+@bat_ok:
+                                                                                                    ;                                                                                                 ;
 ;==========================================================;----------------------------------------;
 ;==========================================================;             Frame drawing              ;
 ;==========================================================;----------------------------------------;
@@ -498,7 +392,8 @@ antenna_draw:                                              ; Antenna icon drawer
    mcall                                                   ; Call SysFn04                           ;
                                                                                                     ;
    mov ebx, 3                   shl 16 + (WINDOWSIZEY - 72)                                         ;
-   mov ecx, ts_idle                                                                                 ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [IFCLs + INTERFACECLR.cmdhistory]                                                       ;
    mov edx, prevStatus2                                                                             ;
    mcall                                                                                            ;
                                                                                                     ;
@@ -507,12 +402,14 @@ antenna_draw:                                              ; Antenna icon drawer
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, 3                   shl 16 + (WINDOWSIZEY - 52)                                         ;
-   mov ecx, ts_danger                                                                               ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [IFCLs + INTERFACECLR.cmdlatest]                                                        ;
    mov edx, currStatus                                                                              ;
    mcall                                                                                            ;
                                                                                                     ;
    mov ebx, 3                   shl 16 + (WINDOWSIZEY - 36)                                         ;
-   mov ecx, ts_active                                                                               ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [IFCLs + INTERFACECLR.cmdcurrent]                                                       ;
    mov edx, terminalIn                                                                              ;
    mcall                                                                                            ;
                                                                                                     ;
@@ -874,10 +771,129 @@ antenna_draw:                                              ; Antenna icon drawer
    mov ebx, 2                   ; /
    mcall                        ; Call SysFn12
    ret                          ;
-                                ;
-   ;----------------------------;
-   ;    ADDITIONAL FUNCTIONS    ;
-   ;----------------------------;
+
+;---------------------------------------------------------------------------------------------------;
+;                                           PROCEDURE BLOCK                                         ;
+;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
+DrawAntenna:                                                                                        ;
+.body:                                                     ; Drawing a body                         ;
+   mov eax, 38                                                                                      ;
+   mov ebx, (WINDOWSIZEX - 119) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mov ecx, 3                   shl 16 + 19                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 3                   shl 16 + 3                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mov ecx, 3                   shl 16 + 9                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 119)                                        ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov edx, [IFCLs + INTERFACECLR.sttsidle]                                                         ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 19                  shl 16 + 3                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   cmp [signalLevel], 0                                                                             ;
+   je  .nosignal                                                                                    ;
+   cmp [signalLevel], 170                                                                           ;
+   ja  .good                                                                                        ;
+   cmp [signalLevel], 85                                                                            ;
+   ja  .normal                                                                                      ;
+   jmp .bad                                                                                         ;
+                                                                                                    ;
+.bad:                                                      ; Drawing if bad signal                  ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
+   jmp @ant_ok                                                                                      ;
+                                                                                                    ;
+.normal:                                                   ; If signal is normal                    ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mov edx, [IFCLs + INTERFACECLR.antennamid]                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
+   jmp @ant_ok                                                                                      ;
+                                                                                                    ;
+.good:                                                     ; If signal is good                      ;
+   mov ebx, (WINDOWSIZEX - 101) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 19                  shl 16 + 3   ;                                                      ;
+   mov edx, [IFCLs + INTERFACECLR.antennagood]                                                      ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 107) shl 16 + (WINDOWSIZEX - 107)                                        ;
+   mov ecx, 19                  shl 16 + 7                                                          ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 113) shl 16 + (WINDOWSIZEX - 113)                                        ;
+   mov ecx, 19                  shl 16 + 11                                                         ;
+   mcall                                                                                            ;
+   jmp @ant_ok                                                                                      ;
+                                                                                                    ;
+.nosignal:                                                 ; If no signal                           ;
+   mov ebx, (WINDOWSIZEX - 125) shl 16 + (WINDOWSIZEX - 101)                                        ;
+   mov ecx, 3                   shl 16 + 19                                                         ;
+   mov edx, [IFCLs + INTERFACECLR.antennabad]                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ecx, 19                  shl 16 + 3                                                          ;
+   mcall                                                                                            ;
+   jmp @ant_ok                                                                                      ;
+                                                                                                    ;
+DrawBattery:                                                                                        ;
+.frame:                                                                                             ;
+   mov eax, 13                                                                                      ;
+   mov ebx, (WINDOWSIZEX - 57) shl 16 + 50                                                          ;
+   mov ecx, 3 shl 16 + 16                                                                           ;
+   mov edx, [IFCLs + INTERFACECLR.batbgclr]                                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 7) shl 16 + 4                                                            ;
+   mov ecx, 6 shl 16 + 10                                                                           ;
+   mcall                                                                                            ;
+                                                                                                    ;
+                                                                                                    ;
+.body:                                                                                              ;
+   mov ebx, (WINDOWSIZEX - 56) shl 16 + 48                                                          ;
+   mov ecx, 4 shl 16 + 14                                                                           ;
+   mov edx, [IFCLs + INTERFACECLR.batfrclr]                                                         ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov ebx, (WINDOWSIZEX - 6) shl 16 + 2                                                            ;
+   mov ecx, 7 shl 16 + 8                                                                            ;
+   mcall                                                                                            ;
+                                                                                                    ;
+.charge:                                                                                            ;
+   mov ebx, (WINDOWSIZEX - 55) shl 16                                                               ;
+   xor bx, [batteryCharge];                                                                         ;
+   mov ecx, 5 shl 16 + 12                                                                           ;
+   mov edx, [IFCLs + INTERFACECLR.batclr]                                                           ;
+   mcall                                                                                            ;
+   xor bx, bx                                                                                       ;
+   jmp @bat_ok                                                                                      ;
+                                                                                                    ;
+                                                           ;----------------------------------------;
+                                                           ;          ADDITIONAL FUNCTIONS          ;
+                                                           ;----------------------------------------;
                                 ;
 com_debug:                      ; COM port feedback
    mov eax, 4                   ; \ Calling SysFn04: Text writing
@@ -959,7 +975,7 @@ DATA                            ; PROGRAM DATA BLOCK
    signalLevel       db   0
    pingValue         db   0
    generatorSeed     dd   0
-   batteryCharge     dw   46
+   batteryCharge     dw   40
 
                                 ;
    ;----------------------------;
