@@ -60,16 +60,16 @@ WINDOWSIZEX = 1024                                                              
 WINDOWSIZEY = 768                                                                                   ;
                                                                                                     ;
 configure:                                                                                          ;
-   mov [IFCPs + INTERFACEPOS.framex],            5                    shl 16   + (WINDOWSIZEX - 6)  ;
-   mov [IFCPs + INTERFACEPOS.framey],            5                    shl 16   + 45                 ;
+   mov [IFCPs + INTERFACEPOS.framex],            1                    shl 16   + (WINDOWSIZEX - 2)  ;
+   mov [IFCPs + INTERFACEPOS.framey],            5                    shl 16   + 5                 ;
    mov [IFCPs + INTERFACEPOS.campicpos],         140                  shl 16   + 50                 ;
    mov [IFCPs + INTERFACEPOS.campicsz],          644                  shl 16   + 480                ;
-   mov [IFCPs + INTERFACEPOS.campictxpos],       370                  shl 16   + 275                ;
+   mov [IFCPs + INTERFACEPOS.campictxpos],       (WINDOWSIZEX - 448)  shl 16   + 255                ;
    mov [IFCPs + INTERFACEPOS.campicnpos],        654                  shl 16   + 505                ;
    mov [IFCPs + INTERFACEPOS.cmdfrpos],          10                   shl 16   + 10                 ;
    mov [IFCPs + INTERFACEPOS.cmdfrsz],           (WINDOWSIZEX - 20)   shl 16   + 40                 ;
                                                                                                     ;
-   mov [IFCLs + INTERFACECLR.frameclr],          0x00FF0000                                         ;
+   mov [IFCLs + INTERFACECLR.frameclr],          0x00A0A0A0                                         ;
    mov [IFCLs + INTERFACECLR.campic1],           0x00FFFFFF                                         ;
    mov [IFCLs + INTERFACECLR.campic2],           0x00FFFF00                                         ;
    mov [IFCLs + INTERFACECLR.campic3],           0x0000FFFF                                         ;
@@ -98,7 +98,7 @@ redraw:                                                    ; Window redrawing   
                                                                                                     ;
 wait_event:                                                ; Waiting for an system event            ;
    mov eax, 23                                             ; \ Calling SysFn10: Infinite waiting    ;
-   mov ebx, 100
+   mov ebx, 4
    mcall                                                   ; /                                      ;
    cmp eax, 0                                              ; \ If SysEvent = 1, then                ;
    je redraw
@@ -164,15 +164,15 @@ draw_window:                                               ; Drawing a window   
                                                                                                     ;
    mov eax, 71                                             ; \ Calling SysFn71: Window header       ;
    mov ebx, 2                                              ; | Use string address without codepage  ;
-   mov ecx, generatorSeed                                         ; | String address                       ;
+   mov ecx, header                                         ; | String address                       ;
    mov edx, 1                                              ; | Codepage                             ;
    mcall                                                   ; /                                      ;
                                                                                                     ;
-   mov eax, 4                                              ; \ Calling SysFn04: Text writing        ;
-   mov ebx, 30 shl 16 + 10                                 ; | X and Y start position               ;
-   mov ecx, tstyle                                         ; | Text style, 0xXXRRGGBB               ;
-   mov edx, string                                         ; | String begin address                 ;
-   mcall                                                   ; /                                      ;
+   ;mov eax, 4                                              ; \ Calling SysFn04: Text writing        ;
+   ;mov ebx, 30 shl 16 + 10                                 ; | X and Y start position               ;
+   ;mov ecx, tstyle                                         ; | Text style, 0xXXRRGGBB               ;
+   ;mov edx, string                                         ; | String begin address                 ;
+   ;mcall                                                   ; /                                      ;
                                                                                                     ;
                                                            ;----------------------------------------;
                                                            ;           Graphics functions           ;
@@ -189,6 +189,28 @@ draw_window:                                               ; Drawing a window   
 ;  mov ecx, 5 shl 16 + 50                                  ; | Y start and end position             ;
 ;  mov edx, 0x00FFFFFF                                     ; | Line color, 0x00RRGGBB               ;
 ;  mcall                                                   ; /                                      ;
+
+   mov eax, 13
+   mov ebx, (WINDOWSIZEX - 57) shl 16 + 50
+   mov ecx, 3 shl 16 + 16
+   mov edx, 0x555555
+   mcall
+   mov ebx, (WINDOWSIZEX - 7) shl 16 + 4
+   mov ecx, 6 shl 16 + 10
+   mcall
+;-------------------------------------------------------------------------------
+
+   mov ebx, (WINDOWSIZEX - 56) shl 16 + 48
+   mov ecx, 4 shl 16 + 14
+   mov edx, 0xC8C8C8
+   mcall
+   mov ebx, (WINDOWSIZEX - 6) shl 16 + 2
+   mov ecx, 7 shl 16 + 8
+   mcall
+   mov ebx, (WINDOWSIZEX - 55) shl 16 + 46
+   mov ecx, 5 shl 16 + 12
+   mov edx, 0xFF8615
+   mcall
                                                                                                     ;
                                                            ;----------------------------------------;
                                                            ;            Antenna drawings            ;
@@ -196,148 +218,201 @@ draw_window:                                               ; Drawing a window   
 antenna_draw:                                              ; Antenna icon drawer function           ;
 .body:                                                     ; Drawing a body                         ;
    mov eax, 38                                             ;                                        ;
-   mov ebx, 810    shl 16 + 810                            ;                                        ;
-   mov ecx, 10     shl 16 + 26                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 119)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
+   mov ecx, 3     shl 16 + 19                             ;                                        ;
    mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 804    shl 16 + 816                            ;                                        ;
-   mov ecx, 10     shl 16 + 10                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
+   mov ecx, 3     shl 16 + 3                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 804    shl 16 + 810                            ;                                        ;
-   mov ecx, 10     shl 16 + 16                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
+   mov ecx, 3     shl 16 + 9                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 816    shl 16 + 810                            ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 119)                            ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
    mov edx, [IFCLs + INTERFACECLR.sttsidle]                ;                                        ;
-   mov ebx, 816    shl 16 + 816                            ;                                        ;
-   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
+   mov ecx, 19     shl 16 + 11                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 824    shl 16 + 824                            ;                                        ;
-   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
+   mov ecx, 19     shl 16 + 7                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 832    shl 16 + 832                            ;                                        ;
-   mov ecx, 26     shl 16 + 10                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 101)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
+   mov ecx, 19     shl 16 + 3                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   ;cmp [signalLevel], 0                                    ;                                        ;
-   cmp [generatorSeed], 0
+   cmp [signalLevel], 0                                    ;                                        ;
    je  .nosignal                                           ;                                        ;
-   ;cmp [signalLevel], 170                                  ;                                        ;
-   cmp [generatorSeed], 170
+   cmp [signalLevel], 170                                  ;                                        ;
    ja  .good                                               ;                                        ;
-   ;cmp [signalLevel], 85                                   ;                                        ;
-   cmp [generatorSeed], 85
+   cmp [signalLevel], 85                                   ;                                        ;
    ja  .normal                                             ;                                        ;
    jmp .bad                                                ;                                        ;
                                                                                                     ;
 .bad:                                                      ; Drawing if bad signal                  ;
-   mov ebx, 816    shl 16 + 816                            ;                                        ;
-   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
+   mov ecx, 19     shl 16 + 11                             ;                                        ;
    mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
    mcall                                                   ;                                        ;
    jmp @f                                                  ;                                        ;
                                                                                                     ;
 .normal:                                                   ; If signal is normal                    ;
-   mov ebx, 824    shl 16 + 824                            ;                                        ;
-   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
+   mov ecx, 19     shl 16 + 7                             ;                                        ;
    mov edx, [IFCLs + INTERFACECLR.antennamid]              ;                                        ;
    mcall                                                                                            ;
                                                            ;                                        ;
-   mov ebx, 816    shl 16 + 816                            ;                                        ;
-   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
+   mov ecx, 19     shl 16 + 11                             ;                                        ;
    mcall                                                   ;                                        ;
    jmp @f                                                                                           ;
                                                                                                     ;
 .good:                                                     ; If signal is good                      ;
-   mov ebx, 832    shl 16 + 832                            ;                                        ;
-   mov ecx, 26     shl 16 + 10   ;                         ;                                        ;
+   mov ebx, (WINDOWSIZEX - 101)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
+   mov ecx, 19     shl 16 + 3   ;                         ;                                        ;
    mov edx, [IFCLs + INTERFACECLR.antennagood]             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 824    shl 16 + 824                            ;                                        ;
-   mov ecx, 26     shl 16 + 14                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 107)    shl 16 + (WINDOWSIZEX - 107)                            ;                                        ;
+   mov ecx, 19     shl 16 + 7                             ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ebx, 816    shl 16 + 816                            ;                                        ;
-   mov ecx, 26     shl 16 + 18                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 113)    shl 16 + (WINDOWSIZEX - 113)                            ;                                        ;
+   mov ecx, 19     shl 16 + 11                             ;                                        ;
    mcall                                                   ;                                        ;
    jmp @f                                                  ;                                        ;
                                                                                                     ;
 .nosignal:                                                 ; If no signal                           ;
-   mov ebx, 804    shl 16 + 832                            ;                                        ;
-   mov ecx, 10     shl 16 + 26                             ;                                        ;
+   mov ebx, (WINDOWSIZEX - 125)    shl 16 + (WINDOWSIZEX - 101)                            ;                                        ;
+   mov ecx, 3     shl 16 + 19                             ;                                        ;
    mov edx, [IFCLs + INTERFACECLR.antennabad]              ;                                        ;
    mcall                                                   ;                                        ;
                                                                                                     ;
-   mov ecx, 26     shl 16 + 10                             ;                                        ;
+   mov ecx, 19     shl 16 + 3                             ;                                        ;
    mcall                                                   ;                                        ;
    jmp @f                                                  ;                                        ;
+
+
                                                                                                     ;
 @@:                                                                                                 ;
                                                            ;----------------------------------------;
                                                            ;             Frame drawings             ;
                                                            ;----------------------------------------;
-                                                           ; Updated and optimized frame drawer
-   mov ebx, [IFCPs + INTERFACEPOS.framex]                  ; See the syntax on line 90
-   mov ecx, [IFCPs + INTERFACEPOS.framey]                  ;
+   mov eax, 4
+   mov ebx, (WINDOWSIZEX - 98) shl 16 + 3
+   mov ecx, 0x80FF8615
+   mov edx, prot_dp40
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 98) shl 16 + 12
+   mov edx, pingInfinity
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 72) shl 16 + 12
+   mov edx, ping_meas
+   mcall
+
+   mov eax, 38                                                        ; Updated and optimized frame drawer
+   mov ebx, 1 shl 16 + (WINDOWSIZEX - 2)                  ; See the syntax on line 90
+   mov ecx, 1 shl 16 + 1                  ;
    mov edx, [IFCLs + INTERFACECLR.frameclr]                ;
    mcall                                                   ;
 
-   mov ecx, 45 * 65536 + 45                                ;
+   mov ecx, (WINDOWSIZEY - 24) shl 16 + (WINDOWSIZEY - 24)   ;
+   mcall
+
+   mov ecx, 21 shl 16 + 21                                ;
    mcall
                                 ;
-   mov ebx, 1017 * 65536 + 1017 ;
-   mov ecx, 5 * 65536 + 763     ;
+   mov ebx, (WINDOWSIZEX - 2) shl 16 + (WINDOWSIZEX - 2) ;
+   mov ecx, 1 shl 16 + (WINDOWSIZEY - 24)     ;
    mcall                        ;
+
+
                                 ;
-   mov ebx, 5 * 65536 + 5       ;
+   mov ebx, 1 shl 16 + 1       ;
    mcall                        ;
-                                ;
-   mov ebx, 5 * 65536 + 1017    ;
-   mov ecx, 763 * 65536 + 763   ;
-   mcall                        ;
-                                ;
+                                ;    ;
+   mov ecx, 763 shl 16 + 763   ;
+   mcall
+   ;
+   mov ebx, (WINDOWSIZEX - 35) shl 16 + (WINDOWSIZEX - 35)
+   mov ecx, 22 shl 16 + (WINDOWSIZEY - 25)
+   mcall
+
+   mov ebx, 2 shl 16 + (WINDOWSIZEX - 36)
+   mov ecx, (WINDOWSIZEY - 76) shl 16 + (WINDOWSIZEY - 76)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)
+   mov ecx, 510 shl 16 + (WINDOWSIZEY - 80)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 508) shl 16 + (WINDOWSIZEX - 508)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 503) shl 16 + (WINDOWSIZEX - 503)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 39) shl 16 + (WINDOWSIZEX - 39)
+   mcall
+
+   mov ecx, 510 shl 16 + 510
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)
+   mcall
+
+   mov ecx, (WINDOWSIZEY - 80) shl 16 + (WINDOWSIZEY - 80)
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 509)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 502) shl 16 + (WINDOWSIZEX - 39)
+   mcall
+
+   ;
    ;----------------------------;
    ;   Camera pic placeholder   ; Drawing a placeholder with size 644x480
    ;----------------------------;
    ;
 
-   mov ecx, 530
-@newLine:
-   mov ebx, 784
-@newPixel:
-   rdtsc
-   mov [generatorSeed], eax
-   mov edx, 0
-
-   mov ebp, 255
-   div ebp
-   mov [generatorSeed], edx
-
-   mov ebp, [generatorSeed]
-   mov edx, 0x00FFFFFF          ;
-   xor edx, ebp
-   mov ebp, [generatorSeed - 1]
-   xor edx, ebp
-   mov ebp, [generatorSeed - 2]
-   xor edx, ebp
-
-   mov eax, 1
-   mcall
-
-   dec ebx
-   cmp ebx, 140
-   jne @newPixel
-@up:
-   dec ecx
-   cmp ecx, 50
-   jne @newLine
+;   mov ecx, 530
+;@newLine:
+;   mov ebx, 784
+;@newPixel:
+;   rdtsc
+;   mov [generatorSeed], eax
+;   mov edx, 0
+;
+;   mov ebp, 255
+;   div ebp
+;   mov [generatorSeed], edx
+;
+;   mov ebp, [generatorSeed]
+;   mov edx, 0x00FFFFFF          ;
+;   xor edx, ebp
+;   mov ebp, [generatorSeed - 1]
+;   xor edx, ebp
+;   mov ebp, [generatorSeed - 2]
+;   xor edx, ebp
+;
+;   mov eax, 1
+;   mcall
+;
+;   dec ebx
+;   cmp ebx, 140
+;   jne @newPixel
+;@up:
+;   dec ecx
+;   cmp ecx, 50
+;   jne @newLine
 
 
                                 ;
@@ -353,153 +428,411 @@ antenna_draw:                                              ; Antenna icon drawer
    mcall                        ; /
                                 ;
    mov eax, 38                  ; Updated and optimized frame drawing
-   mov ebx, 140 * 65536 + 784   ;
-   mov ecx, 50 * 65536 + 50     ;
-   mov edx, 0x00FFFF00          ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 39)   ;
+   mov ecx, 26 shl 16 + 26     ;
+   mov edx, 0x00FF8615          ;
+   mcall                        ;
+                             ;
+   mov ecx, 506 shl 16 + 506   ;
    mcall                        ;
                                 ;
-   mov ecx, 530 * 65536 + 530   ;
+   mov ebx, (WINDOWSIZEX - 683) shl 16 + (WINDOWSIZEX - 683)   ;
+   mov ecx, 26 shl 16 + 506    ;
    mcall                        ;
                                 ;
-   mov ebx, 140 * 65536 + 140   ;
-   mov ecx, 50 * 65536 + 530    ;
+   mov ebx, (WINDOWSIZEX - 39) shl 16 + (WINDOWSIZEX - 39)   ;
    mcall                        ;
-                                ;
-   mov ebx, 784 * 65536 + 784   ;
-   mcall                        ;
+
+
                                 ;
    ;----------------------------;
    ;        Text drawing        ;
    ;----------------------------;
                                 ;
    mov eax, 4                   ; \ Calling SysFn04: Text writing
-   mov ebx, 654 * 65536 + 505   ; | X start position and Y start position
-   mov ecx, 0xC2FFFFFF          ; | Text style, 0xXXRRGGBB
+   mov ebx, (WINDOWSIZEX - 174) shl 16 + 479   ; | X start position and Y start position
+   mov ecx, 0xC2FF8615          ; | Text style, 0xXXRRGGBB
    mov edx, cam                 ; | String begin address
-   mov edi, 0x00000000          ; | Font background color, 0x00RRGGBB
+   mov edi, 0x00323232          ; | Font background color, 0x00RRGGBB
    mcall                        ; /
 
    mov ebx, [IFCPs + INTERFACEPOS.campictxpos]
    mov edx, signal
    mcall
                                 ;
-   mov ebx, 768 * 65536 + 505   ; Move to EBX register XY coordinate
+   mov ebx, (WINDOWSIZEX - 57) shl 16 + 479   ; Move to EBX register XY coordinate
    mov edx, numCamera           ; Move to EDX register string address
    mcall                        ; Call SysFn04
                                 ;
-   mov ebx, 10 * 65536 + 6      ; Move to EBX register XY coordinate
+   mov ebx, 3 shl 16 + (WINDOWSIZEY - 72)      ; Move to EBX register XY coordinate
    mov ecx, ts_idle             ; Move to ECX register a color value
    mov edx, prevStatus2         ; Move to EDX register string address
    mcall                        ; Call SysFn04
                                 ;
-   mov ebx, 10 * 65536 + 16     ; Move to EBX register XY coordinate
+   mov ebx, 3 shl 16 + (WINDOWSIZEY - 62)     ; Move to EBX register XY coordinate
    mov edx, prevStatus1         ;
    mcall                        ; Call SysFn04
                                 ;
-   mov ebx, 10 * 65536 + 26     ; Move to EBX register XY coordinate
+   mov ebx, 3 shl 16 + (WINDOWSIZEY - 52)     ; Move to EBX register XY coordinate
    mov ecx, ts_danger           ; Move to ECX register a color value
    mov edx, currStatus          ; Move to EDX register string address
    mcall                        ; Call SysFn04
                                 ;
-   mov ebx, 10 * 65536 + 36     ; Move to EBX register XY coordinate
+   mov ebx, 3 shl 16 + (WINDOWSIZEY - 36)     ; Move to EBX register XY coordinate
    mov ecx, ts_active           ; Move to ECX register a color value
    mov edx, terminalIn          ; Move to EDX register string address
    mcall                        ; Call SysFn04
+
+   mov ebx, (WINDOWSIZEX - 68) shl 16 + (WINDOWSIZEY - 72)
+   mov edx, terminalHeader
+   mcall
+
+   mov eax, 38
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mov ecx, 512 shl 16 + 512
+   mov edx, [IFCLs + INTERFACECLR.frameclr]
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 529 shl 16 + 529
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 531 shl 16 + 531
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 548 shl 16 + 548
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 550 shl 16 + 550
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 567 shl 16 + 567
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 569 shl 16 + 569
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 586 shl 16 + 586
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 588 shl 16 + 588
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 605 shl 16 + 605
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 607 shl 16 + 607
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 624 shl 16 + 624
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 626 shl 16 + 626
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 643 shl 16 + 643
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 645 shl 16 + 645
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 662 shl 16 + 662
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 664 shl 16 + 664
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
+   mov ecx, 681 shl 16 + 681
+   mov ebx, (WINDOWSIZEX - 41) shl 16 + (WINDOWSIZEX - 116)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 118) shl 16 + (WINDOWSIZEX - 193)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 195) shl 16 + (WINDOWSIZEX - 270)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 272) shl 16 + (WINDOWSIZEX - 347)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 349) shl 16 + (WINDOWSIZEX - 424)
+   mcall
+
+   mov ebx, (WINDOWSIZEX - 426) shl 16 + (WINDOWSIZEX - 501)
+   mcall
+
                                 ;
-   mov ebx, 10 * 65536 + 50     ; Move to EBX register XY coordinate
-   mov ecx, ts_category         ; Move to ECX register a color value
-   mov edx, flagshd             ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 60     ; Move to EBX register XY coordinate
-   mov ecx, ts_error            ; Move to ECX register a color value
-   mov edx, droneStatus         ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 70     ; Move to EBX register XY coordinate
-   mov edx, droneBattery        ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 80     ; Move to EBX register XY coordinate
-   mov edx, droneMovement       ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 90     ; Move to EBX register XY coordinate
-   mov edx, droneAutomove       ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 100    ; Move to EBX register XY coordinate
-   mov edx, droneManipulator    ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 110    ; Move to EBX register XY coordinate
-   mov edx, droneAutoasm        ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 120    ; Move to EBX register XY coordinate
-   mov edx, droneWarning        ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 130    ; Move to EBX register XY coordinate
-   mov edx, droneDamaged        ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 10 * 65536 + 150    ; Move to EBX register XY coordinate
-   mov ecx, ts_category         ; Move to ECX register a color value
-   mov edx, flagshd2            ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 160    ; Move to EBX register XY coordinate
-   mov ecx, ts_active           ; Move to ECX register a color value
-   mov edx, droneIdle           ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 170    ; Move to EBX register XY coordinate
-   mov ecx, ts_idle             ; Move to ECX register a color value
-   mov edx, droneThumper        ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 180    ; Move to EBX register XY coordinate
-   mov edx, droneElon           ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 190    ; Move to EBX register XY coordinate
-   mov ecx, ts_danger           ; Move to ECX register a color value
-   mov edx, droneLights         ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 15 * 65536 + 200    ; Move to EBX register XY coordinate
-   mov edx, droneLaser          ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 800 * 65535 + 50    ; Move to EBX register XY coordinate
-   mov ecx, ts_category         ; Move to ECX register a color value
-   mov edx, flagshd3            ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 805 * 65535 + 60    ; Move to EBX register XY coordinate
-   mov ecx, ts_idle             ; Move to ECX register a color value
-   mov edx, aboutCOM            ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 805 * 65535 + 70    ; Move to EBX register XY coordinate
-   mov edx, control             ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 805 * 65535 + 80    ; Move to EBX register XY coordinate
-   mov edx, speedConf           ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 800 * 65535 + 100   ; Move to EBX register XY coordinate
-   mov ecx, ts_category         ; Move to ECX register a color value
-   mov edx, flagshd4            ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
-   mov ebx, 805 * 65535 + 110   ; Move to EBX register XY coordinate
-   mov ecx, ts_idle             ; Move to ECX register a color value
-   mov edx, aboutDrone          ; Move to EDX register string address
-   mcall                        ; Call SysFn04
-                                ;
+
    mov eax, 12                  ; \ Calling SysFn12: Window redraw, end
    mov ebx, 2                   ; /
    mcall                        ; Call SysFn12
@@ -540,7 +873,7 @@ DATA                            ; PROGRAM DATA BLOCK
    IFCLs             rd   19
 
    numCamera         db   49, 0
-   header            db   'toqsycc labs : drone terminal mk.1 rev.0', 0
+   header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
    string            db   'Sample string', 0
    signal            db   'NO SIGNAL!', 0
    aboutCOM          db   'RC on COM ', 0
@@ -555,7 +888,8 @@ DATA                            ; PROGRAM DATA BLOCK
    currStatus        db   'Terminal initialised successfully.', 0
    prevStatus1       db   'COM port not found. Task ignored.', 0
    prevStatus2       db   'Receiver not found. Task ignored.', 0
-   terminalIn        db   '#terminal > ', 0
+   terminalIn        db   '#terminal > _', 0
+   terminalHeader    db   'DEBUG', 0
                                 ;
    droneStatus       db   'Online', 0
    droneLaser        db   'Laser', 0
@@ -582,9 +916,12 @@ DATA                            ; PROGRAM DATA BLOCK
    trans_fast        db   'Fast', 0
    ping              db   'CONNECTION PING: ', 0
    ping_meas         db   'ms', 0
+   pingInfinity      db   'inf', 0
+   prot_dp40         db   'DP-40', 0
 
    signalLevel       db   0
-   generatorSeed     dd   0, 0
+   pingValue         db   0
+   generatorSeed     dd   0
 
                                 ;
    ;----------------------------;
