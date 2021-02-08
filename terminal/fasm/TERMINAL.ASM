@@ -18,98 +18,126 @@ CODE                                                                            
 ;---------------------------------------------------------------------------------------------------;
                                                                                                     ;
 struct INTERFACEPOS                                                    ; Interface Positions struct ;
-   framex                  dd ?                                        ; Frame position (in window) ;
-   framey                  dd ?                                                                     ;
-   campicpos               dd ?                                                                     ;
-   campicsz                dd ?                                                                     ;
-   campictxpos             dd ?                                                                     ;
-   campicnpos              dd ?                                                                     ;
-   cmdfrpos                dd ?                                                                     ;
-   cmdfrsz                 dd ?                                                                     ;
-   antennapos              dd ?                                                                     ;
-   antennasz               dd ?                                                                     ;
-   batterypos              dd ?                                                                     ;
-   batterysz               dd ?                                                                     ;
-   catimppos               dd ?                                                                     ;
-   cataddpos               dd ?                                                                     ;
-   catdronepos             dd ?                                                                     ;
+   framex                  dd                    ?                     ; Frame position (in window) ;
+   framey                  dd                    ?                                                  ;
+   campicpos               dd                    ?                                                  ;
+   campicsz                dd                    ?                                                  ;
+   campictxpos             dd                    ?                                                  ;
+   campicnpos              dd                    ?                                                  ;
+   cmdfrpos                dd                    ?                                                  ;
+   cmdfrsz                 dd                    ?                                                  ;
+   antennapos              dd                    ?                                                  ;
+   antennasz               dd                    ?                                                  ;
+   batterypos              dd                    ?                                                  ;
+   batterysz               dd                    ?                                                  ;
+   catimppos               dd                    ?                                                  ;
+   cataddpos               dd                    ?                                                  ;
+   catdronepos             dd                    ?                                                  ;
 ends                                                                                                ;
                                                                                                     ;
 struct INTERFACECLR                                                                                 ;
-   accent                  dd ?                                                                     ;
-   background              dd ?                                                                     ;
-   frameclr                dd ?                                                                     ;
-   campic1                 dd ?                                                                     ;
-   campic2                 dd ?                                                                     ;
-   campic3                 dd ?                                                                     ;
-   campic4                 dd ?                                                                     ;
-   campic5                 dd ?                                                                     ;
-   campic6                 dd ?                                                                     ;
-   campic7                 dd ?                                                                     ;
-   cmdhistory              dd ?                                                                     ;
-   cmdlatest               dd ?                                                                     ;
-   cmdcurrent              dd ?                                                                     ;
-   antennabad              dd ?                                                                     ;
-   antennamid              dd ?                                                                     ;
-   antennagood             dd ?                                                                     ;
-   catgclr                 dd ?                                                                     ;
-   sttsidle                dd ?                                                                     ;
-   sttsactive              dd ?                                                                     ;
-   sttsdanger              dd ?                                                                     ;
-   sttsdamage              dd ?                                                                     ;
-   batbgclr                dd ?                                                                     ;
-   batfrclr                dd ?                                                                     ;
-   batclr                  dd ?                                                                     ;
+   accent                  dd                    ?                                                  ;
+   background              dd                    ?                                                  ;
+   frameclr                dd                    ?                                                  ;
+   campic1                 dd                    ?                                                  ;
+   campic2                 dd                    ?                                                  ;
+   campic3                 dd                    ?                                                  ;
+   campic4                 dd                    ?                                                  ;
+   campic5                 dd                    ?                                                  ;
+   campic6                 dd                    ?                                                  ;
+   campic7                 dd                    ?                                                  ;
+   cmdhistory              dd                    ?                                                  ;
+   cmdlatest               dd                    ?                                                  ;
+   cmdcurrent              dd                    ?                                                  ;
+   antennabad              dd                    ?                                                  ;
+   antennamid              dd                    ?                                                  ;
+   antennagood             dd                    ?                                                  ;
+   catgclr                 dd                    ?                                                  ;
+   sttsidle                dd                    ?                                                  ;
+   sttsactive              dd                    ?                                                  ;
+   sttsdanger              dd                    ?                                                  ;
+   sttsdamage              dd                    ?                                                  ;
+   batbgclr                dd                    ?                                                  ;
+   batfrclr                dd                    ?                                                  ;
+   batclr                  dd                    ?                                                  ;
 ends                                                                                                ;
                                                                                                     ;
 struct WNDPRM                                                                                       ;
-   style                  dd ?                                                                      ;
-   header                 dd ?                                                                      ;
-   frame                  dd ?                                                                      ;
-   txtcolor               dd ?                                                                      ;
+   style                   dd                    ?                                                  ;
+   header                  dd                    ?                                                  ;
+   frame                   dd                    ?                                                  ;
+   txtcolor                dd                    ?                                                  ;
 ends                                                                                                ;
                                                                                                     ;
 struct FLAG                                                                                         ;
-   width                  dd ?                                                                      ;
-   height                 dd ?                                                                      ;
-   size                   dd ?                                                                      ;
-   warnpos                dd ?                                                                      ;
-   warnclr                dd ?                                                                      ;
-   stat_na                dd ?                                                                      ;
-   stat_off               dd ?                                                                      ;
-   stat_on                dd ?                                                                      ;
-   stat_act               dd ?                                                                      ;
-   stat_idle              dd ?                                                                      ;
-   stat_dang              dd ?                                                                      ;
-   stat_nr                dd ?                                                                      ;
+   width                   dd                    ?                                                  ;
+   height                  dd                    ?                                                  ;
+   size                    dd                    ?                                                  ;
+   warnpos                 dd                    ?                                                  ;
+   warnclr                 dd                    ?                                                  ;
+   stat_na                 dd                    ?                                                  ;
+   stat_off                dd                    ?                                                  ;
+   stat_on                 dd                    ?                                                  ;
+   stat_act                dd                    ?                                                  ;
+   stat_idle               dd                    ?                                                  ;
+   stat_dang               dd                    ?                                                  ;
+   stat_nr                 dd                    ?                                                  ;
 ends                                                                                                ;
                                                                                                     ;
 struct EFLAG                                                                                        ;
-   fg_work                dd ?                                                                      ;
-   fg_rf                  dd ?                                                                      ;
-   fg_bat                 dd ?                                                                      ;
-   fg_prot                dd ?                                                                      ;
-   fg_fdbk                dd ?                                                                      ;
-   fg_com                 dd ?                                                                      ;
-   fg_spdt                dd ?                                                                      ;
-   fg_tire                dd ?                                                                      ;
-   fg_aer                 dd ?                                                                      ;
-   fg_eng                 dd ?                                                                      ;
-   fg_dmgd                dd ?                                                                      ;
-   fg_stat                dd ?                                                                      ;
-   fg_ctrl                dd ?                                                                      ;
-   fg_mnpl                dd ?                                                                      ;
-   fg_vid                 dd ?                                                                      ;
-   fg_rcom                dd ?                                                                      ;
-   fg_scty                dd ?                                                                      ;
-   fg_mvmt                dd ?                                                                      ;
-   fg_idl                 dd ?                                                                      ;
-   fg_lig                 dd ?                                                                      ;
-   fg_lasr                dd ?                                                                      ;
-   fg_warn                dd ?                                                                      ;
-   fg_snd                 dd ?                                                                      ;
-   fg_jmr                 dd ?                                                                      ;
-   fg_spec                dd ?                                                                      ;
+   fg_work                 dd                    ?                                                  ;
+   fg_rf                   dd                    ?                                                  ;
+   fg_bat                  dd                    ?                                                  ;
+   fg_prot                 dd                    ?                                                  ;
+   fg_fdbk                 dd                    ?                                                  ;
+   fg_com                  dd                    ?                                                  ;
+   fg_spdt                 dd                    ?                                                  ;
+   fg_tire                 dd                    ?                                                  ;
+   fg_aer                  dd                    ?                                                  ;
+   fg_eng                  dd                    ?                                                  ;
+   fg_dmgd                 dd                    ?                                                  ;
+   fg_stat                 dd                    ?                                                  ;
+   fg_ctrl                 dd                    ?                                                  ;
+   fg_mnpl                 dd                    ?                                                  ;
+   fg_vid                  dd                    ?                                                  ;
+   fg_rcom                 dd                    ?                                                  ;
+   fg_scty                 dd                    ?                                                  ;
+   fg_mvmt                 dd                    ?                                                  ;
+   fg_idl                  dd                    ?                                                  ;
+   fg_lig                  dd                    ?                                                  ;
+   fg_lasr                 dd                    ?                                                  ;
+   fg_warn                 dd                    ?                                                  ;
+   fg_snd                  dd                    ?                                                  ;
+   fg_jmr                  dd                    ?                                                  ;
+   fg_spec                 dd                    ?                                                  ;
+ends                                                                                                ;
+                                                                                                    ;
+struct NFLAG                                                                                        ;
+   fg_work                 db                    'WORK',              0                             ;
+   fg_rf                   db                    'RF',                0                             ;
+   fg_bat                  db                    'BAT',               0                             ;
+   fg_prot                 db                    'PROT',              0                             ;
+   fg_fdbk                 db                    'FDBK',              0                             ;
+   fg_com                  db                    'COM',               0                             ;
+   fg_spdt                 db                    'SPDT',              0                             ;
+   fg_tire                 db                    'TIRE',              0                             ;
+   fg_aer                  db                    'AER',               0                             ;
+   fg_eng                  db                    'ENG',               0                             ;
+   fg_dmgd                 db                    'DMGD',              0                             ;
+   fg_stat                 db                    'STAT',              0                             ;
+   fg_ctrl                 db                    'CTRL',              0                             ;
+   fg_mnpl                 db                    'MNPL',              0                             ;
+   fg_vid                  db                    'VID',               0                             ;
+   fg_rcom                 db                    'RCOM',              0                             ;
+   fg_scty                 db                    'SCTY',              0                             ;
+   fg_mvmt                 db                    'MVMT',              0                             ;
+   fg_idl                  db                    'IDL',               0                             ;
+   fg_lig                  db                    'LIG',               0                             ;
+   fg_lasr                 db                    'LASR',              0                             ;
+   fg_warn                 db                    'WARN',              0                             ;
+   fg_snd                  db                    'SND',               0                             ;
+   fg_jmr                  db                    'JMR',               0                             ;
+   fg_spec                 db                    'SPEC',              0                             ;
 ends                                                                                                ;
                                                                                                     ;
 WINDOWSIZEX = 1024                                                                                  ;
@@ -467,8 +495,9 @@ draw_window:                                               ; Drawing a window   
 ;==========================================================;             Text drawing               ;
 ;==========================================================;----------------------------------------;
 
-   mov [bufferN], fg_work
-   mov edx, [FGs + FLAG.stat_on]
+   mov bh, [FGn + NFLAG.fg_work]
+   mov [bufferN], ebx
+   mov edx, [FGe + EFLAG.fg_work]
    mov ebp, [FGs + FLAG.size]
    mov edi, (WINDOWSIZEX - 501) shl 16 + 512
    mov esi, @fgwork
@@ -476,7 +505,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgwork:
 
-   mov [bufferN], fg_rf
+   ;mov [bufferN], [FGn + NFLAG.fg_rf]
    mov edx, [FGs + FLAG.stat_on]
    mov edi, (WINDOWSIZEX - 425) shl 16 + 512
    mov esi, @fgrf
@@ -484,7 +513,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgrf:
 
-   mov [bufferN], fg_bat
+   ;mov [bufferN], [FGn + NFLAG.fg_bat]
    mov edx, [FGs + FLAG.stat_off]
    mov edi, (WINDOWSIZEX - 349) shl 16 + 512
    mov esi, @fgbat
@@ -492,7 +521,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgbat:
 
-   mov [bufferN], fg_prot
+  ; mov [bufferN], [FGn + NFLAG.fg_prot]
    mov edx, [FGs + FLAG.stat_idle]
    mov edi, (WINDOWSIZEX - 501) shl 16 + 530
    mov esi, @fgprot
@@ -500,7 +529,7 @@ draw_window:                                               ; Drawing a window   
    jmp DrawFlag
 @fgprot:
 
-   mov [bufferN], fg_fdbk
+  ; mov [bufferN], [FGn + NFLAG.fg_fdbk]
    mov edx, [FGs + FLAG.stat_dang]
    mov edi, (WINDOWSIZEX - 425) shl 16 + 530
    mov esi, @fgfdbk
@@ -612,7 +641,6 @@ DrawBattery:                                                                    
    mov ecx, 6 shl 16 + 10                                                                           ;
    mcall                                                                                            ;
                                                                                                     ;
-                                                                                                    ;
 .body:                                                                                              ;
    mov ebx, (WINDOWSIZEX - 56) shl 16 + 48                                                          ;
    mov ecx, 4 shl 16 + 14                                                                           ;
@@ -631,175 +659,99 @@ DrawBattery:                                                                    
    mcall                                                                                            ;
    xor bx, bx                                                                                       ;
    jmp @bat_ok                                                                                      ;
-
-; DrawFlag drawings a flag icon with pre-defined params:
-; - EDX contains EFLAG. flag status pointer
-; - EBP contains SIZE OF flag button. See FLAG.size struct
-; - EDI contains START POINT OF button
-; - ESP contains ANONIMOUS ESCAPE ADDRESS of procedure
-DrawFlag:
-   mov eax, 13
-   mov [bufferW2], edx
-
-   mov ebx, edi
-   mov [bufferW], ebp
-   shr ebp, 16
-   mov bx, bp
-   mov ebp, [bufferW]
-
-   mov [bufferW], edi
-   shl edi, 16
-   mov ecx, edi
-   mov cx, bp
-
-   mcall
-
-   add ebx, 1 shl 16
-   add ecx, 1 shl 16
-   sub bx, 2
-   sub cx, 2
-   mov edx, [IFCLs + INTERFACECLR.background]
-   mcall
-
-   mov eax, 4
-   mov ebx, [bufferW]
-   add ebx, [FGs + FLAG.warnpos]
-   mov ecx, [WPs + WNDPRM.txtcolor]
-   xor ecx, [FGs + FLAG.warnclr]
-   mov edx, fg_warn
-   mcall
-
-   add ebx, 10 shl 16
-   mov ecx, [WPs + WNDPRM.txtcolor]
-   xor ecx, [bufferW2]
-   mov edx, [bufferN]
-   mcall
-
+                                                                                                    ;
+; DrawFlag drawings a flag icon with pre-defined params:                                            ;
+; - EDX contains EFLAG. flag status pointer                                                         ;
+; - EBP contains SIZE OF flag button. See FLAG.size struct                                          ;
+; - EDI contains START POINT OF button                                                              ;
+; - ESP contains ANONIMOUS ESCAPE ADDRESS of procedure                                              ;
+DrawFlag:                                                                                           ;
+   mov eax, 13                                                                                      ;
+   mov [bufferW2], edx                                                                              ;
+                                                                                                    ;
+   mov ebx, edi                                                                                     ;
+   mov [bufferW], ebp                                                                               ;
+   shr ebp, 16                                                                                      ;
+   mov bx, bp                                                                                       ;
+   mov ebp, [bufferW]                                                                               ;
+                                                                                                    ;
+   mov [bufferW], edi                                                                               ;
+   shl edi, 16                                                                                      ;
+   mov ecx, edi                                                                                     ;
+   mov cx, bp                                                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   add ebx, 1 shl 16                                                                                ;
+   add ecx, 1 shl 16                                                                                ;
+   sub bx, 2                                                                                        ;
+   sub cx, 2                                                                                        ;
+   mov edx, [IFCLs + INTERFACECLR.background]                                                       ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   mov eax, 4                                                                                       ;
+   mov ebx, [bufferW]                                                                               ;
+   add ebx, [FGs + FLAG.warnpos]                                                                    ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [FGs + FLAG.warnclr]                                                                    ;
+   mov edx, fg_warn                                                                                 ;
+   mcall                                                                                            ;
+                                                                                                    ;
+   add ebx, 10 shl 16                                                                               ;
+   mov ecx, [WPs + WNDPRM.txtcolor]                                                                 ;
+   xor ecx, [bufferW2]                                                                              ;
+   mov edx, [bufferN]                                                                               ;
+   mcall                                                                                            ;
+                                                                                                    ;
    jmp esi                                                                                          ;
-                                                           ;----------------------------------------;
-                                                           ;          ADDITIONAL FUNCTIONS          ;
-                                                           ;----------------------------------------;
-                                ;
-;com_debug:                      ; COM port feedback
-;   mov eax, 4                   ; \ Calling SysFn04: Text writing
-;   mov ebx, 30 * 65536 + 30     ; | X start position and Y start position
-;   mov ecx, tstyle              ; | Text style, 0xXXRRGGBB
-;   mov edx, string              ; | String begin address
-;   mcall                        ; /
-                                ;
-;com_send:                       ; COM port using
-;   mov eax, 43                  ; \ Calling SysFn43: I/O ports
-;   mov ebx, 0x0F                ; | Move to EBX register a data to send
-;   mov ecx, 0x4                 ; | Move to ECX register a port to use
-;   mcall                        ; /
-;   xor eax, 0                   ; Comparing EAX register value with 0
-;   js com_debug                 ; If EAX = 0 then jump to com_debug
-                                ;
-DATA                            ; PROGRAM DATA BLOCK
-   keyid db 0                  ; Reserved for pressed key ID's (1 byte)
-                                ;
-   picWidth = 784               ; Const for drawing algorithm
-   picHeight = 530              ; Const for drawing algorithm
-                                ;
-   ;----------------------------;
-   ;      DATA BLOCK BEGIN      ;
-   ;----------------------------;
-   ; name        | type | value ;
-   ;----------------------------;
-                                ;
+                                                                                                    ;
+; MEMORY BLOCK MOV FUNC
+; Using pre-defined params:
+; ESI - ESCAPE ADDRESS
+MemoryMov:
+
+
+;---------------------------------------------------------------------------------------------------;
+;                                         PROGRAM DATA BLOCK                                        ;
+;---------------------------------------------------------------------------------------------------;
+                                                                                                    ;
+DATA
+   keyid             db   0
+                                                                                                    ;
    IFCPs             rd   15
    IFCLs             rd   24
    WPs               rd   4
    FGs               rd   12
    FGe               rd   25
-
-   numCamera         db   49, 0
+   FGn               rb   25
+                                                                                                    ;
+   numCamera         db   '1',                                        0
    header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
-   signal            db   'NO SIGNAL!', 0
-   aboutCOM          db   'RC on COM ', 0
-   aboutDrone        db   'Connected: ', 0
-   speedConf         db   'Speeds group: ', 0
-   control           db   'Controller: ', 0
-   flagshd           db   'IMP FLAGS :', 0
-   flagshd2          db   'ADD FLAGS :', 0
-   flagshd3          db   'COM FLAGS :', 0
-   flagshd4          db   'DRONE DATA :', 0
-   cam               db   'CAMERA ', 0
-   currStatus        db   'Terminal initialised successfully.', 0
-   prevStatus1       db   'COM port not found. Task ignored.', 0
-   prevStatus2       db   'Receiver not found. Task ignored.', 0
-   terminalIn        db   '#terminal > _', 0
-   terminalHeader    db   'DEBUG', 0
-                                ;
-   droneStatus       db   'Online', 0
-   droneLaser        db   'Laser', 0
-   droneThumper      db   'Thumper', 0
-   droneElon         db   'Mecanum', 0
-   droneMovement     db   'Movement', 0
-   droneIdle         db   'Idling', 0
-   droneBattery      db   'Battery', 0
-   droneAutomove     db   'Automovement', 0
-   droneAutoasm      db   'Autoassembling', 0
-   droneLights       db   'Light', 0
-   droneManipulator  db   'Manipulator', 0
-   droneWarning      db   'Warning', 0
-   droneDamaged      db   'Damaged', 0
-   droneSF           db   'Savoir-Faire'
-                                ;
-   measure           db   'm/s^2', 0
-   accelX            db   'X ACCELERATION: ', 0
-   accelY            db   'Y ACCELERATION: ', 0
-   accelZ            db   'Z ACCELERATION: ', 0
-   transmission      db   'TRANSMISSION TYPE: ', 0
-   trans_slow        db   'Slow', 0
-   trans_normal      db   'Normal', 0
-   trans_fast        db   'Fast', 0
-   ping              db   'CONNECTION PING: ', 0
-   ping_meas         db   'ms', 0
-   ping_inf          db   'inf', 0
-   protocol          db   'DP-40', 0
-
-   fg_warn           db   '!', 0
-   fg_work           db   'WORK', 0
-   fg_rf             db   'RF', 0
-   fg_bat            db   'BAT', 0
-   fg_prot           db   'PROT', 0
-   fg_fdbk           db   'FDBK', 0
-
+   signal            db   'NO SIGNAL!',                               0
+   cam               db   'CAMERA ',                                  0
+   currStatus        db   'Terminal initialised successfully.',       0
+   prevStatus1       db   'COM port not found. Task ignored.',        0
+   prevStatus2       db   'Receiver not found. Task ignored.',        0
+   terminalIn        db   '#terminal > _',                            0
+   terminalHeader    db   'DEBUG',                                    0
+                                                                                                    ;
+   droneName         db   'n/a',                                      0
+                                                                                                    ;
+   ping_meas         db   'ms',                                       0
+   ping_inf          db   'inf',                                      0
+   protocol          db   'n/a',                                      0
+                                                                                                    ;
+   fg_warn           db   '!',                                        0
+                                                                                                    ;
    signalLevel       db   0
    pingValue         db   0
    generatorSeed     dd   0
    batteryCharge     dw   40
+                                                                                                    ;
    bufferN           dd   0
    bufferS           dw   0
    bufferW           dd   0
    bufferW2          dd   0
-
-                                ;
-   ;----------------------------;
-   ;  ADDITIVE CONSTANTS BLOCK  ;
-   ;----------------------------;
-   ; name            | value    ;
-                                ;
-                                ;
-   mvmt_idle         =     0x00646464
-   mvmt_active       =     0x00FF6464
-   accel_xaxis       =     0x00FF0000
-   accel_yaxis       =     0x00FFFF00
-   accel_zaxis       =     0x0000FF00
-                                ;
-   console_idle      =     0x00A0A0A0
-   console_type      =     0x00D0D0D0
-                                ;
-   connect_bad       =     0x00FF0000
-   connect_mid       =     0x00FFFF00
-   connect_good      =     0x0000FF00
-   connect_na        =     0x00A0A0A0
-                                ;
-   ;----------------------------;
-   ;       DATA BLOCK END       ;
-   ;----------------------------;
-                                ;
+                                                                                                    ;
 UDATA                           ; PROGRAM UDATA BLOCK
                                 ;
 MEOS_APP_END                    ; PROGRAM END MACROS
