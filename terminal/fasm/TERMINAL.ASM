@@ -495,7 +495,9 @@ draw_window:                                               ; Drawing a window   
 ;==========================================================;             Text drawing               ;
 ;==========================================================;----------------------------------------;
 
-   mov bh, [FGn + NFLAG.fg_work]
+
+
+   mov bl, [FGn + NFLAG.fg_work]
    mov [bufferN], ebx
    mov edx, [FGe + EFLAG.fg_work]
    mov ebp, [FGs + FLAG.size]
@@ -761,6 +763,50 @@ fpucos:                                                                         
   fstp [fpu_cos]                                                                                    ;
   fnop                                                                                              ;
   jmp esi                                                                                           ;
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                  ;: FPU PRNG procedure                            :;
+                                                  ;: Using                                         :;
+                                                  ;: - [fpur_minval] as MINIMAL RETURN VALUE       :;
+                                                  ;: - [fpur_maxval] as MAXIMAL RETURN VALUE       :;
+                                                  ;: Return value: random number at [fpu_rand]     :;
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                                                                    ;
+fpurand:                                                                                            ;
+  enter 16, 0                                                                                       ;
+                                                                                                    ;
+  rdtsc                                                                                             ;
+                                                                                                    ;
+  mov dword[bp - 16], 127773                                                                        ;
+  mov dword[bp - 12], 16807                                                                         ;
+  mov dword[bp - 8], 2836                                                                           ;
+  mov dword[bp - 4], eax                                                                            ;
+                                                                                                    ;
+  finit                                                                                             ;
+                                                                                                    ;
+  fild dword[bp - 4]                                                                                ;
+  fidiv dword[bp - 16]                                                                              ;
+  fist dword[bp - 4]                                                                                ;
+                                                                                                    ;
+  fimul dword[bp - 12]                                                                              ;
+  fidiv dword[bp - 8]                                                                               ;
+  fist dword[bp - 4]                                                                                ;
+                                                                                                    ;
+  fidiv dword[bp - 16]                                                                              ;
+  fimul dword[bp - 8]                                                                               ;
+  fist dword[bp - 4]                                                                                ;
+                                                                                                    ;
+  fild [fpur_maxval]                                                                                ;
+  fisub [fpur_minval]                                                                               ;
+  fxch                                                                                              ;
+  fprem1                                                                                            ;
+  fiadd [fpur_minval]                                                                               ;
+  fistp [fpu_rand]                                                                                  ;
+                                                                                                    ;
+  fnop                                                                                              ;
+                                                                                                    ;
+  leave                                                                                             ;
+  jmp esi                                                                                           ;
                                                                                                     ;
 gpuround:
 
@@ -813,8 +859,12 @@ DATA
    fpu_sin           dd   ?
    fpu_cos           dd   ?
 
-   fpu_pi            dd    3.14159265359
-   fpu_180           dd    180.0
+   fpu_rand          dd   0
+   fpur_minval       dd   0
+   fpur_maxval       dd   0
+
+   fpu_pi            dd   3.14159265359
+   fpu_180           dd   180.0
                                                                                                     ;
 UDATA                           ; PROGRAM UDATA BLOCK
                                 ;
