@@ -744,7 +744,6 @@ fpusin:                                                                         
   finit                                                                                             ;
   fld [fpu_real]                                                                                    ;
   fsin                                                                                              ;
-  fmul [fpu_m10]                                                                                    ;
   fstp [fpu_sin]                                                                                    ;
   fnop                                                                                              ;
   jmp esi                                                                                           ;
@@ -759,11 +758,14 @@ fpucos:                                                                         
   finit                                                                                             ;
   fld [fpu_real]                                                                                    ;
   fcos                                                                                              ;
-  fmul [fpu_m10]                                                                                    ;
   fstp [fpu_cos]                                                                                    ;
   fnop                                                                                              ;
   jmp esi                                                                                           ;
                                                                                                     ;
+gpuround:
+
+  jmp esi
+
 ;---------------------------------------------------------------------------------------------------;
 ;                                         PROGRAM DATA BLOCK                                        ;
 ;---------------------------------------------------------------------------------------------------;
