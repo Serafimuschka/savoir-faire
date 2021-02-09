@@ -704,12 +704,66 @@ DrawFlag:                                                                       
                                                                                                     ;
    jmp esi                                                                                          ;
                                                                                                     ;
-; MEMORY BLOCK MOV FUNC
-; Using pre-defined params:
-; ESI - ESCAPE ADDRESS
-MemoryMov:
+;---------------------------------------------------------------------------------------------------;
+;                                            TMAPI32 BLOCK                                          ;
+;---------------------------------------------------------------------------------------------------;
 
+memset:
 
+   jmp esi
+
+memcpy:
+
+   jmp esi
+
+;---------------------------------------------------------------------------------------------------;
+;                                           FPU + SSE BLOCK                                         ;
+;---------------------------------------------------------------------------------------------------;
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                  ;: FPU Degrees to Radians procedure              :;
+                                                  ;: Using [fpu_real] DWORD with value in degrees  :;
+                                                  ;: Return value: radians in [fpu_real]           :;
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                                                                    ;
+fpudtr:                                                                                             ;
+  finit                                           ; FPU init after check                            ;
+  fld [fpu_real]                                  ; [fpu_real] -> register                          ;
+  fmul [fpu_pi]                                   ; register * [fpu_pi] -> register                 ;
+  fdiv [fpu_180]                                  ; register / [fpu_180] -> register                ;
+  fstp [fpu_real]                                 ; register -> [fpu_real]                          ;
+  fnop                                            ; FPU no operations                               ;
+  jmp esi                                         ; Escape address pointer                          ;
+                                                                                                    ;
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                  ;: FPU sin procedure                             :;
+                                                  ;: Using [fpu_real] DWORD with value in radians  :;
+                                                  ;: Return value: sin value in [fpu_sin]          :;
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                                                                    ;
+fpusin:                                                                                             ;
+  finit                                                                                             ;
+  fld [fpu_real]                                                                                    ;
+  fsin                                                                                              ;
+  fmul [fpu_m10]                                                                                    ;
+  fstp [fpu_sin]                                                                                    ;
+  fnop                                                                                              ;
+  jmp esi                                                                                           ;
+                                                                                                    ;
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                  ;: FPU cos procedure                             :;
+                                                  ;: Using [fpu_real] DWORD with value in radians  :;
+                                                  ;: Return value: cos value in [fpu_cos]          :;
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;:::::::::::::::::::::::::::::::::::::::::::::::::;
+                                                                                                    ;
+fpucos:                                                                                             ;
+  finit                                                                                             ;
+  fld [fpu_real]                                                                                    ;
+  fcos                                                                                              ;
+  fmul [fpu_m10]                                                                                    ;
+  fstp [fpu_cos]                                                                                    ;
+  fnop                                                                                              ;
+  jmp esi                                                                                           ;
+                                                                                                    ;
 ;---------------------------------------------------------------------------------------------------;
 ;                                         PROGRAM DATA BLOCK                                        ;
 ;---------------------------------------------------------------------------------------------------;
@@ -751,6 +805,14 @@ DATA
    bufferS           dw   0
    bufferW           dd   0
    bufferW2          dd   0
+
+   fpu_real          dd   0.0
+   fpu_m10           dd   10.0
+   fpu_sin           dd   ?
+   fpu_cos           dd   ?
+
+   fpu_pi            dd    3.14159265359
+   fpu_180           dd    180.0
                                                                                                     ;
 UDATA                           ; PROGRAM UDATA BLOCK
                                 ;
