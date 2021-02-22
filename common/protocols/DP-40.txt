@@ -1,86 +1,95 @@
-Drone Protocol 40-bit
-rev. 0001
+|---------------------------------------------------------------------------------------------------------------|
+|Drone Protocol 40-bit (Data Protocol - 40)                                                                     |
+|rev. 0001                                                                                                      |
+|---------------------------------------------------------------------------------------------------------------|
+|Edited by toqsycc
+|---------------------------------------------------------------------------------------------------------------|
+|Overview:                                                                                                      |
+|        Input data (HEX): XX-XX-XX-XX-XX                                                                       |
+|        Auth keys         -            -                                                                       |
+|        1st cmd addr       - -                                                                                 |
+|        1st cmd arg           - -                                                                              |
+|        2nd cmd addr             - -                                                                           |
+|        2nd cmd arg                 - -                                                                        |
+|                                                                                                               |
+|        Output data(HEX): XX-XX-XX-XX-XX                                                                       |
+|        Auth keys         -            -        INVERTED!                                                      |
+|        1st cmd addr       - -                                                                                 |
+|        1st cmd status        - -                                                                              |
+|        2nd cmd addr             - -                                                                           |
+|        2nd cmd status              - -                                                                        |
+|---------------------------------------------------------------------------------------------------------------|
+|Example:                                                                                                       |
+|        For input data (HEX): { EF, F3, 2F, D3, 22 }                                                           |
+|        Auth keys is:                   E2                                                                     |
+|        1st cmd addr is:                FF                                                                     |
+|        2nd cmd addr is:                FD                                                                     |
+|        1st cmd arg is:                 32                                                                     |
+|        2nd cmd arg is:                 32                                                                     |
+|                                                                                                               |
+|        For output data (HEX): { 2F, F3, 2F, D3, 2E }                                                          |
+|        Auth keys is:                   E2                                                                     |
+|        1st cmd addr is:                FF                                                                     |
+|        2nd cmd addr is:                FD                                                                     |
+|        1st cmd status is:              32                                                                     |
+|        2nd cmd status is:              32                                                                     |
+|---------------------------------------------------------------------------------------------------------------|
+|Command address table:                                                                                         |
+|        |                Command address               |      Purpose / description      |      Additions      |
+|        \\ Special                                                                                             |
+|        00                                              Force system reset                SYSTEM               |
+|        01                                              Force IC clock signal             ADDON CONTROL        |
+|        02                                              Force IC set signal               ADDON CONTROL        |
+|        03                                              Force IC reset signal             ADDON CONTROL        |
+|        04                                              Set buffer value to 0             RAM                  |
+|        05                                              Set auth key to NVRAM             NVRAM                |
+|        06                                              Set password key to NVRAM         NVRAM                |
+|        07                                              Send auth request                 SECURITY, CONNECTION |
+|        08                                              Send password                     SECURITY, CONNECTION |
+|        09                                              Send feedback request             STATUS               |
+|        0A..0F                                          N/A                               RESERVED             |
+|        \\ Engine group, forward moving                                                                        |
+|        10..1F                                          Servo / Engines 1-16              NORMAL               |
+|        \\ Engine group, backward moving                                                                       |
+|        20..2F                                          Servo / Engines 1-16              INVERTED             |
+|        \\ Power supply controls                                                                               |
+|        30..3F                                          PS Lines 1-16: NC open - NO close RELAY UNIT           |
+|        \\ Input channels                                                                                      |
+|        40..4F                                          Input PISO shift registers 1-16   INPUT ONLY           |
+|        50..5F                                          Input PISO shift registers 17-32  INPUT ONLY           |
+|        \\ Output channels                                                                                     |
+|        60..6F                                          Output SIPO shift registers 1-16  OUTPUT ONLY          |
+|        70..7F                                          Output SIPO shift registers 17-32 OUTPUT ONLY          |
+|        \\ Sensors info                                                                                        |
+|        80..8F                                          Sensor serial ports 1-16          SENSOR ARRAY         |
+|        90..9F                                          Sensor serial ports 17-32         SENSOR ARRAY         |
+|        \\ Invoker module                                                                                      |
+|        A0..AF                                          Invoke executors on ports 1-16    EXECUTION            |
+|        B0..BF                                          Invoke executors on ports 17-32   EXECUTION            |
+|        C0..CF                                          Invoke executors on ports 18-48   EXECUTION            |
+|        \\ Personal commands                                                                                   |
+|        D0..FF                                          Reserved for extra commands       RESERVED, EXTRA      |
+|---------------------------------------------------------------------------------------------------------------|
+|Status table:                                                                                                  |
+|        00                                              Not using                                              |
+|        01                                              Idle                                                   |
+|        02                                              Connection opened                                      |
+|        03                                              Authorization requested                                |
+|        04                                              Password requested                                     |
+|        05                                              Sending feedback                                       |
+|        06                                              NVRAM loading                                          |
+|        07                                              NVRAM writing                                          |
+|        08                                              Authorization accepted                                 |
+|        09                                              Authorization rejected                                 |
+|        0A                                              Task confirmed                                         |
+|        0B                                              Incorrect task                                         |
+|        0C                                              Any error                                              |
+|        0D                                              Component not responding, damaged or destroyed         |
+|        0E                                              Battery level                                          |
+|        0F..FF                                          Reserved for extra statuses                            |
+|---------------------------------------------------------------------------------------------------------------|
 
-Edited by toqsycc
-
-Overview:
-        Input data (HEX): XX-XX-XX-XX-XX
-        Auth keys         -            -
-        1st cmd addr       - -
-        1st cmd arg           - -
-        2nd cmd addr             - -
-        2nd cmd arg                 - -
-
-        Output data(HEX): XX-XX-XX-XX-XX
-        Auth keys         -            -        INVERTED!
-        1st cmd addr       - -
-        1st cmd status        - -
-        2nd cmd addr             - -
-        2nd cmd status              - -
-
-Example:
-        For input data (HEX): { EF, F3, 2F, D3, 22 }
-        Auth keys is:                   E2
-        1st cmd addr is:                FF
-        2nd cmd addr is:                FD
-        1st cmd arg is:                 32
-        2nd cmd arg is:                 32
-
-        For output data (HEX): { 2F, F3, 2F, D3, 2E }
-        Auth keys is:                   E2
-        1st cmd addr is:                FF
-        2nd cmd addr is:                FD
-        1st cmd status is:              32
-        2nd cmd status is:              32
-
-Command address table:
-        |                Command address               |      Purpose / description      |      Additions
-        \\ Special
-        00                                              Force system reset                SYSTEM
-        01                                              Force IC clock signal             ADDON CONTROL
-        02                                              Force IC set signal               ADDON CONTROL      
-        03                                              Force IC reset signal             ADDON CONTROL
-        04                                              Set buffer value to 0             RAM
-        05                                              Set auth key to NVRAM             NVRAM
-        06                                              Set password key to NVRAM         NVRAM      
-        07                                              Send auth request                 SECURITY, CONNECTION
-        08                                              Send password                     SECURITY, CONNECTION
-        09                                              Send feedback request             STATUS
-        0A..0F                                          N/A                               RESERVED      
-        \\ Engine group, forward moving
-        10..1F                                          Servo / Engines 1-16              NORMAL
-        \\ Engine group, backward moving
-        20..2F                                          Servo / Engines 1-16              INVERTED
-        \\ Power supply controls
-        30..3F                                          PS Lines 1-16: NC open - NO close RELAY UNIT
-        \\ Input channels
-        40..4F                                          Input PISO shift registers 1-16   INPUT ONLY
-        50..5F                                          Input PISO shift registers 17-32  INPUT ONLY
-        \\ Output channels
-        60..6F                                          Output SIPO shift registers 1-16  OUTPUT ONLY
-        70..7F                                          Output SIPO shift registers 17-32 OUTPUT ONLY
-        \\ Sensors info
-        80..8F                                          Sensor serial ports 1-16          SENSOR ARRAY
-        90..9F                                          Sensor serial ports 17-32         SENSOR ARRAY
-        \\ Invoker module
-        A0..AF                                          Invoke executors on ports 1-16    EXECUTION
-        B0..BF                                          Invoke executors on ports 17-32   EXECUTION
-        C0..CF                                          Invoke executors on ports 18-48   EXECUTION
-        \\ Personal commands
-        D0..FF                                          Reserved for extra commands       RESERVED, EXTRA      
----------------------------------------------------------------------------------------------------------------
-Status table:
-        \\ Special \\
-        00..EF                                  Reserved
-        \\ Others \\
-        F0                                              Failed
-        FA                                              Succeeded
-        FB                                              Idle
-        FC                                              Online
-        FD                                              Not respond
-        FE                                              Damaged or destroyed
-        FF                                              Battery low
-
+OBSOLETE
 Terminal status table:
         CODE                                            DESCRIPTION                        FLAG
         ---------------------------------------------------------------------------------------

@@ -710,13 +710,13 @@ DrawFlag:                                                                       
 ;                                            TMAPI32 BLOCK                                          ;
 ;---------------------------------------------------------------------------------------------------;
 
-memset:
+;memset:
 
-   jmp esi
+;   jmp esi
 
-memcpy:
+;memcpy:
 
-   jmp esi
+;   jmp esi
 
 ;---------------------------------------------------------------------------------------------------;
 ;                                           FPU + SSE BLOCK                                         ;
@@ -808,9 +808,9 @@ fpurand:                                                                        
   leave                                                                                             ;
   jmp esi                                                                                           ;
                                                                                                     ;
-gpuround:
+;gpuround:
 
-  jmp esi
+;  jmp esi
 
 ;---------------------------------------------------------------------------------------------------;
 ;                                         PROGRAM DATA BLOCK                                        ;
@@ -827,7 +827,7 @@ DATA
    FGn               rb   25
                                                                                                     ;
    numCamera         db   '1',                                        0
-   header            db   '                                DRONE TERMINAL | REV. 0001 | TOQSYCC LABS 2020-2021', 0
+   header            db   'toqsycclabs RTerminal v0.1 (c) 2020-2021', 0
    signal            db   'NO SIGNAL!',                               0
    cam               db   'CAMERA ',                                  0
    currStatus        db   'Terminal initialised successfully.',       0
