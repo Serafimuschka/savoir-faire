@@ -34,43 +34,41 @@ Example:
         2nd cmd status is:              32
 
 Command address table:
-        \\ Special \\
-        00..0F                                  Reserved
-        20..2F                                  Reserved
-        35..DF                                  Reserved
-        E7..FF                                  Reserved
-        \\ With inversion support \\
-        10                                              Left engines row
-        11                                              Right engines row
-        12                                              Servo A / Clearance angle
-        13                                              Servo B / Center of mass
-        14                                              Servo C / Manipulator base
-        15                                              Servo D / Manipulator bend
-        16                                              Servo E / Manipulator X axis
-        17                                              Servo F / Manipulator Z axis
-        18                                              Inverted 10
-        19                                              Inverted 11
-        1A                                              Inverted 12
-        1B                                              Inverted 13
-        1C                                              Inverted 14
-        1D                                              Inverted 15
-        1E                                              Inverted 16
-        1F                                              Inverted 17
-        \\ Logic \\
-        30                                              Laser power
-        31                                              Transmitter power
-        32                                              Lights power
-        33                                              Camera channel selector A
-        34                                              Camera channel selector B
-        \\ Output only \\
-        E0                                              Accelerometer X angle
-        E1                                              Accelerometer Y angle
-        E2                                              Accelerometer Z angle
-        E3                                              Accelerometer X acceleration
-        E4                                              Accelerometer Y acceleration
-        E5                                              Accelerometer Z acceleration
-        E6                                              Drone state
-
+        |                Command address               |      Purpose / description      |      Additions
+        \\ Special
+        00                                              Force system reset                SYSTEM
+        01                                              Force IC clock signal             ADDON CONTROL
+        02                                              Force IC set signal               ADDON CONTROL      
+        03                                              Force IC reset signal             ADDON CONTROL
+        04                                              Set buffer value to 0             RAM
+        05                                              Set auth key to NVRAM             NVRAM
+        06                                              Set password key to NVRAM         NVRAM      
+        07                                              Send auth request                 SECURITY, CONNECTION
+        08                                              Send password                     SECURITY, CONNECTION
+        09                                              Send feedback request             STATUS
+        0A..0F                                          N/A                               RESERVED      
+        \\ Engine group, forward moving
+        10..1F                                          Servo / Engines 1-16              NORMAL
+        \\ Engine group, backward moving
+        20..2F                                          Servo / Engines 1-16              INVERTED
+        \\ Power supply controls
+        30..3F                                          PS Lines 1-16: NC open - NO close RELAY UNIT
+        \\ Input channels
+        40..4F                                          Input PISO shift registers 1-16   INPUT ONLY
+        50..5F                                          Input PISO shift registers 17-32  INPUT ONLY
+        \\ Output channels
+        60..6F                                          Output SIPO shift registers 1-16  OUTPUT ONLY
+        70..7F                                          Output SIPO shift registers 17-32 OUTPUT ONLY
+        \\ Sensors info
+        80..8F                                          Sensor serial ports 1-16          SENSOR ARRAY
+        90..9F                                          Sensor serial ports 17-32         SENSOR ARRAY
+        \\ Invoker module
+        A0..AF                                          Invoke executors on ports 1-16    EXECUTION
+        B0..BF                                          Invoke executors on ports 17-32   EXECUTION
+        C0..CF                                          Invoke executors on ports 18-48   EXECUTION
+        \\ Personal commands
+        D0..FF                                          Reserved for extra commands       RESERVED, EXTRA      
+---------------------------------------------------------------------------------------------------------------
 Status table:
         \\ Special \\
         00..EF                                  Reserved
