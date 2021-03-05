@@ -772,7 +772,11 @@ fpucos:                                                                         
                                                   ;: Return value: random number at [fpu_rand]     :;
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;:::::::::::::::::::::::::::::::::::::::::::::::::;
                                                                                                     ;
-fpurand:                                                                                            ;
+;gpuround:
+
+;  jmp esi
+
+proc fpurand, minval, maxval
   enter 16, 0                                                                                       ;
                                                                                                     ;
   rdtsc                                                                                             ;
@@ -805,12 +809,9 @@ fpurand:                                                                        
                                                                                                     ;
   fnop                                                                                              ;
                                                                                                     ;
-  leave                                                                                             ;
-  jmp esi                                                                                           ;
-                                                                                                    ;
-;gpuround:
-
-;  jmp esi
+  leave
+  ret
+endp
 
 ;---------------------------------------------------------------------------------------------------;
 ;                                         PROGRAM DATA BLOCK                                        ;
